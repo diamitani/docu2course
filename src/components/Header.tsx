@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
 
 const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -27,13 +28,16 @@ const Header: React.FC = () => {
     >
       <div className="container max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center">
-          <span className="text-2xl font-medium tracking-tight">docu<span className="text-primary">2</span>course</span>
+          <Link to="/" className="text-2xl font-medium tracking-tight">
+            docu<span className="text-primary">2</span>course
+          </Link>
         </div>
         
         <nav className="hidden md:flex items-center space-x-8">
-          <a href="#features" className="text-sm font-medium hover:text-primary transition-colors">Features</a>
-          <a href="#how-it-works" className="text-sm font-medium hover:text-primary transition-colors">How It Works</a>
-          <a href="#examples" className="text-sm font-medium hover:text-primary transition-colors">Examples</a>
+          <Link to="/#features" className="text-sm font-medium hover:text-primary transition-colors">Features</Link>
+          <Link to="/#how-it-works" className="text-sm font-medium hover:text-primary transition-colors">How It Works</Link>
+          <Link to="/#examples" className="text-sm font-medium hover:text-primary transition-colors">Examples</Link>
+          <Link to="/rag-framework" className="text-sm font-medium hover:text-primary transition-colors">RAG Framework</Link>
           <Button variant="default" size="sm" className="ml-4">
             Get Started
           </Button>
