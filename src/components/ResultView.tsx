@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,6 +13,7 @@ interface ResultViewProps {
 
 const ResultView: React.FC<ResultViewProps> = ({ course, faq }) => {
   const [activeLesson, setActiveLesson] = useState(0);
+  const [activeTab, setActiveTab] = useState<'content' | 'activities' | 'resources'>('content');
   
   if (!course && !faq) return null;
 
@@ -29,11 +31,28 @@ const ResultView: React.FC<ResultViewProps> = ({ course, faq }) => {
         
         course.modules.forEach((module, index) => {
           content += `## Module ${index + 1}: ${module.title}\n\n`;
+          
           content += `### Learning Objectives\n\n`;
           module.objectives.forEach(obj => {
             content += `- ${obj}\n`;
           });
           content += `\n### Content\n\n${module.content}\n\n`;
+          
+          if (module.activities && module.activities.length > 0) {
+            content += `### Activities\n\n`;
+            module.activities.forEach((activity, i) => {
+              content += `${i + 1}. ${activity}\n`;
+            });
+            content += `\n`;
+          }
+          
+          if (module.resources && module.resources.length > 0) {
+            content += `### Resources\n\n`;
+            module.resources.forEach((resource) => {
+              content += `- ${resource}\n`;
+            });
+            content += `\n`;
+          }
           
           if (module.quiz) {
             content += `### Knowledge Check\n\n`;
@@ -134,31 +153,77 @@ const ResultView: React.FC<ResultViewProps> = ({ course, faq }) => {
                         </ul>
                       </div>
                       
-                      <div className="prose max-w-none">
-                        <h5 className="text-sm font-medium text-muted-foreground mb-2">Lesson Content</h5>
-                        <p className="whitespace-pre-line">{course.modules[activeLesson].content}</p>
-                      </div>
-                      
-                      {course.modules[activeLesson].quiz && (
-                        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                          <h5 className="text-sm font-medium mb-3">Knowledge Check</h5>
-                          <p className="mb-4">{course.modules[activeLesson].quiz.question}</p>
+                      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'content' | 'activities' | 'resources')}>
+                        <TabsList className="mb-4">
+                          <TabsTrigger value="content">Lesson</TabsTrigger>
+                          <TabsTrigger value="activities">Activities</TabsTrigger>
+                          <TabsTrigger value="resources">Resources</TabsTrigger>
+                        </TabsList>
+                        
+                        <TabsContent value="content" className="prose max-w-none">
+                          <h5 className="text-sm font-medium text-muted-foreground mb-2">Lesson Content</h5>
+                          <p className="whitespace-pre-line">{course.modules[activeLesson].content}</p>
                           
-                          <div className="space-y-2">
-                            {course.modules[activeLesson].quiz.options.map((option, i) => (
-                              <div key={i} className="flex items-center">
-                                <input 
-                                  type="radio" 
-                                  id={`option-${i}`} 
-                                  name="quiz-option" 
-                                  className="mr-2"
-                                />
-                                <label htmlFor={`option-${i}`}>{option}</label>
+                          {course.modules[activeLesson].quiz && (
+                            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                              <h5 className="text-sm font-medium mb-3">Knowledge Check</h5>
+                              <p className="mb-4">{course.modules[activeLesson].quiz.question}</p>
+                              
+                              <div className="space-y-2">
+                                {course.modules[activeLesson].quiz.options.map((option, i) => (
+                                  <div key={i} className="flex items-center">
+                                    <input 
+                                      type="radio" 
+                                      id={`option-${i}`} 
+                                      name="quiz-option" 
+                                      className="mr-2"
+                                    />
+                                    <label htmlFor={`option-${i}`}>{option}</label>
+                                  </div>
+                                ))}
                               </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                            </div>
+                          )}
+                        </TabsContent>
+                        
+                        <TabsContent value="activities">
+                          <h5 className="text-sm font-medium text-muted-foreground mb-2">Practice Activities</h5>
+                          {course.modules[activeLesson].activities && course.modules[activeLesson].activities.length > 0 ? (
+                            <ul className="space-y-3">
+                              {course.modules[activeLesson].activities.map((activity, i) => (
+                                <li key={i} className="p-3 border rounded-md">
+                                  <div className="flex items-center">
+                                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mr-3">
+                                      <span className="text-primary font-medium text-xs">{i + 1}</span>
+                                    </div>
+                                    <span>{activity}</span>
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-muted-foreground">No activities available for this module.</p>
+                          )}
+                        </TabsContent>
+                        
+                        <TabsContent value="resources">
+                          <h5 className="text-sm font-medium text-muted-foreground mb-2">Additional Resources</h5>
+                          {course.modules[activeLesson].resources && course.modules[activeLesson].resources.length > 0 ? (
+                            <ul className="space-y-2">
+                              {course.modules[activeLesson].resources.map((resource, i) => (
+                                <li key={i} className="flex items-start">
+                                  <svg className="w-5 h-5 text-blue-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                  </svg>
+                                  <span>{resource}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-muted-foreground">No additional resources for this module.</p>
+                          )}
+                        </TabsContent>
+                      </Tabs>
                     </CardContent>
                   </Card>
                 </div>

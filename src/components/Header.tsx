@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 
 const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   
   useEffect(() => {
     const handleScroll = () => {
@@ -18,6 +19,10 @@ const Header: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [scrolled]);
+
+  const handleNavClick = () => {
+    setMenuOpen(false);
+  };
 
   return (
     <header 
@@ -33,18 +38,71 @@ const Header: React.FC = () => {
           </Link>
         </div>
         
-        <nav className="hidden md:flex items-center space-x-8">
-          <Link to="/#features" className="text-sm font-medium hover:text-primary transition-colors">Features</Link>
-          <Link to="/#how-it-works" className="text-sm font-medium hover:text-primary transition-colors">How It Works</Link>
-          <Link to="/rag-framework" className="text-sm font-medium hover:text-primary transition-colors">RAG Framework</Link>
-          <Link to="/faq" className="text-sm font-medium hover:text-primary transition-colors">FAQ</Link>
-          <Button variant="default" size="sm" className="ml-4" onClick={() => document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth' })}>
+        <nav className={cn(
+          "md:flex items-center space-x-8 md:space-y-0 transition-all",
+          menuOpen 
+            ? "absolute top-full left-0 right-0 flex flex-col items-center space-y-4 py-6 bg-white shadow-md" 
+            : "hidden md:flex"
+        )}>
+          <Link 
+            to="/#features" 
+            className="text-sm font-medium hover:text-primary transition-colors"
+            onClick={handleNavClick}
+          >
+            Features
+          </Link>
+          <Link 
+            to="/#how-it-works" 
+            className="text-sm font-medium hover:text-primary transition-colors"
+            onClick={handleNavClick}
+          >
+            How It Works
+          </Link>
+          <Link 
+            to="/rag-framework" 
+            className="text-sm font-medium hover:text-primary transition-colors"
+            onClick={handleNavClick}
+          >
+            RAG Framework
+          </Link>
+          <Link 
+            to="/faq" 
+            className="text-sm font-medium hover:text-primary transition-colors"
+            onClick={handleNavClick}
+          >
+            FAQ
+          </Link>
+          <Link 
+            to="/#pricing" 
+            className="text-sm font-medium hover:text-primary transition-colors"
+            onClick={handleNavClick}
+          >
+            Pricing
+          </Link>
+          <Button 
+            variant="default" 
+            size="sm" 
+            className="ml-4" 
+            onClick={() => {
+              document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth' });
+              handleNavClick();
+            }}
+          >
             Get Started
           </Button>
         </nav>
         
-        <Button variant="ghost" size="icon" className="md:hidden">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="md:hidden"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          {menuOpen ? (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+          )}
         </Button>
       </div>
     </header>

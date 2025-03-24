@@ -5,6 +5,7 @@ import Upload from '@/components/Upload';
 import ProcessingVisual from '@/components/ProcessingVisual';
 import ResultView from '@/components/ResultView';
 import ApiKeyForm from '@/components/ApiKeyForm';
+import PricingSection from '@/components/PricingSection';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CourseType, FAQType, processDocument, simulateProgress } from '@/utils/processingUtils';
@@ -24,6 +25,26 @@ const Index = () => {
     // Check if API key exists in localStorage
     const apiKey = localStorage.getItem('ai_api_key');
     setHasApiKey(!!apiKey);
+    
+    // Handle hash fragments for navigation
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash) {
+        const element = document.getElementById(hash.substring(1));
+        if (element) {
+          setTimeout(() => {
+            element.scrollIntoView({ behavior: 'smooth' });
+          }, 100);
+        }
+      }
+    };
+    
+    // Execute on first load
+    handleHashChange();
+    
+    // Add event listener for hash changes
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   const handleFileUploaded = (uploadedFile: File) => {
@@ -94,8 +115,8 @@ const Index = () => {
               <Button size="lg" onClick={() => document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth' })}>
                 Get Started
               </Button>
-              <Button size="lg" variant="outline">
-                View Examples
+              <Button size="lg" variant="outline" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>
+                See Features
               </Button>
             </div>
           </div>
@@ -130,8 +151,8 @@ const Index = () => {
       <section id="how-it-works" className="py-20 bg-gray-50">
         <div className="container px-4 md:px-6">
           <div className="text-center mb-16">
-            <h2 className="section-title">How It Works</h2>
-            <p className="section-subtitle">Turn your documents into engaging learning experiences in minutes</p>
+            <h2 className="text-3xl font-bold tracking-tighter mb-4">How It Works</h2>
+            <p className="max-w-[700px] mx-auto text-muted-foreground text-lg">Turn your documents into engaging learning experiences in minutes</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -177,8 +198,8 @@ const Index = () => {
       <section id="upload-section" className="py-20">
         <div className="container px-4 md:px-6">
           <div className="text-center mb-12">
-            <h2 className="section-title">Try It Yourself</h2>
-            <p className="section-subtitle">Upload a document to see the transformation</p>
+            <h2 className="text-3xl font-bold tracking-tighter mb-4">Try It Yourself</h2>
+            <p className="max-w-[700px] mx-auto text-muted-foreground text-lg">Upload a document to see the transformation</p>
           </div>
           
           <div className="max-w-2xl mx-auto">
@@ -222,8 +243,8 @@ const Index = () => {
       <section id="features" className="py-20 bg-gray-50">
         <div className="container px-4 md:px-6">
           <div className="text-center mb-16">
-            <h2 className="section-title">Key Features</h2>
-            <p className="section-subtitle">Powerful tools to transform your documents into engaging learning experiences</p>
+            <h2 className="text-3xl font-bold tracking-tighter mb-4">Key Features</h2>
+            <p className="max-w-[700px] mx-auto text-muted-foreground text-lg">Powerful tools to transform your documents into engaging learning experiences</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -278,15 +299,20 @@ const Index = () => {
         </div>
       </section>
       
+      {/* Add the Pricing Section */}
+      <PricingSection />
+      
       <section className="py-20 bg-primary/5">
         <div className="container px-4 md:px-6">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="section-title">Ready to Transform Your Documents?</h2>
-            <p className="section-subtitle">Convert manuals, guides, and any documentation into engaging learning experiences</p>
+            <h2 className="text-3xl font-bold tracking-tighter mb-4">Ready to Transform Your Documents?</h2>
+            <p className="max-w-[700px] mx-auto text-muted-foreground text-lg mb-8">
+              Convert manuals, guides, and any documentation into engaging learning experiences
+            </p>
             
             <div className="mt-8">
               <Button size="lg" onClick={() => document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth' })}>
-                Start Now
+                Start Now - Free!
               </Button>
             </div>
           </div>

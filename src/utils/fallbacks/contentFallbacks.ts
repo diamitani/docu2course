@@ -2,90 +2,83 @@
 import { CourseType, FAQType } from '../processingUtils';
 
 /**
- * Creates a fallback course structure when processing fails
+ * Creates a fallback course when API fails
  * @param title Title for the fallback course
- * @param errorDetail Details about the error
- * @returns A basic course structure
+ * @param errorMessage Error message to include in course
+ * @returns A minimal course structure
  */
-export const createFallbackCourse = (title: string, errorDetail: string): CourseType => {
+export const createFallbackCourse = (title: string, errorMessage: string = ""): CourseType => {
   return {
-    title: "Document Processing Results",
-    description: "We've analyzed your document and created this basic course structure. For better results, try uploading a text-based document.",
+    title: title,
+    description: "This is a basic course structure created when we couldn't process your document properly. Please try again with a different document or check your API key.",
     modules: [
       {
-        title: "Understanding Your Document",
-        content: "We were able to process your document but encountered some challenges creating a structured course. Below are some key points we were able to extract:\n\n- Your document appears to contain valuable information that could be structured into learning modules.\n- Our system works best with text-based documents in common formats like PDF, DOC, or TXT.\n- For optimal results, ensure your document has clear headings and well-organized content.",
-        objectives: ["Understand document processing capabilities", "Learn how to optimize documents for processing", "Explore alternative document formats"],
+        title: "Document Processing Guide",
+        content: `We encountered some issues when trying to process your document. Here are some possible reasons:\n\n` +
+          `1. The document format may not be supported or is too complex\n` +
+          `2. The API may have timed out or returned an error\n` +
+          `3. The content might be too specialized or need more context\n\n` +
+          `Technical details (for debugging): ${errorMessage.substring(0, 500)}`,
+        objectives: [
+          "Understand document processing limitations",
+          "Learn how to provide better input documents",
+          "Troubleshoot common processing issues"
+        ],
         quiz: {
-          question: "What document formats work best with our system?",
-          options: ["Image-only files", "PDFs with text content", "Password-protected documents", "Binary files"],
-          answer: 1
-        }
-      },
-      {
-        title: "Troubleshooting Document Processing",
-        content: "If you encountered issues with your document processing, here are some steps you can take:\n\n1. Ensure your document contains actual text content (not just images or scans)\n2. Check that your document isn't corrupted or password-protected\n3. Try converting your document to a different format (e.g., PDF to DOCX)\n4. For image-based documents, consider using OCR software first",
-        objectives: ["Identify common document processing issues", "Learn troubleshooting techniques", "Discover document conversion options"],
-        quiz: {
-          question: "What should you do if your document processing fails?",
-          options: ["Give up", "Try a different document format", "Contact support", "All of the above"],
-          answer: 3
-        }
-      },
-      {
-        title: "Error Details",
-        content: `Technical information about what happened:\n\n${errorDetail.substring(0, 500)}`,
-        objectives: ["Understand what went wrong", "Get technical details about the error", "Learn how to avoid similar issues"],
-        quiz: {
-          question: "Why do API responses sometimes fail to parse as JSON?",
-          options: ["The API is broken", "The response format doesn't match expectations", "JSON is an outdated format", "The document was too short"],
-          answer: 1
-        }
+          question: "What format works best for document processing?",
+          options: [
+            "Text-based PDFs with clear structure",
+            "Scanned image PDFs without OCR",
+            "Password-protected documents",
+            "Heavily formatted documents with complex layouts"
+          ],
+          answer: 0
+        },
+        activities: [
+          "Check if your document is text-based (you can copy text from it)",
+          "If using a PDF, ensure it's not just scanned images",
+          "Try simplifying your document structure or format"
+        ],
+        resources: [
+          "Documentation on supported file formats",
+          "Tips for preparing documents for processing",
+          "Contact support for assistance"
+        ]
       }
     ]
   };
 };
 
 /**
- * Creates a fallback FAQ structure when processing fails
+ * Creates a fallback FAQ when API fails
  * @param title Title for the fallback FAQ
- * @param errorDetail Details about the error
- * @returns A basic FAQ structure
+ * @param errorMessage Error message to include in FAQ
+ * @returns A minimal FAQ structure
  */
-export const createFallbackFAQ = (title: string, errorDetail: string): FAQType => {
+export const createFallbackFAQ = (title: string, errorMessage: string = ""): FAQType => {
   return {
-    title: "Document FAQs",
-    description: "We've created these FAQs based on common questions about document processing and content extraction.",
+    title: title,
+    description: "This is a basic FAQ created when we couldn't process your document properly. Please try again with a different document or check your API key.",
     questions: [
       {
-        question: "What types of documents work best with this system?",
-        answer: "Text-based documents like PDFs with actual text content (not scanned images), Word documents (DOC, DOCX), and plain text files (TXT) work best. The system extracts text content to generate structured courses and FAQs.",
-        tags: ["document types", "supported formats", "best practices"]
+        question: "Why couldn't my document be processed?",
+        answer: `There could be several reasons why your document couldn't be processed correctly:\n\n` +
+          `- The document format may not be supported\n` +
+          `- The content might be too complex or specialized\n` +
+          `- There might have been an API timeout or error\n` +
+          `- The document might be too large\n\n` +
+          `Technical details (for debugging): ${errorMessage.substring(0, 300)}`,
+        tags: ["error", "troubleshooting", "document"]
       },
       {
-        question: "Why did my document processing encounter issues?",
-        answer: "Document processing might face challenges if your file contains primarily images, is scanned without OCR, has unusual formatting, is corrupted, or is too large. The system works best with clearly structured text content.",
-        tags: ["troubleshooting", "processing issues", "document problems"]
+        question: "What file formats work best?",
+        answer: "For best results, use text-based PDFs, DOC/DOCX files, or plain text files. Make sure PDFs contain actual text and not just scanned images. If you have a scanned document, try running OCR (Optical Character Recognition) on it first.",
+        tags: ["format", "pdf", "doc", "text"]
       },
       {
-        question: "How can I improve my document for better results?",
-        answer: "To get better results: 1) Ensure your document has actual text content, not just images 2) Use clear headings and sections 3) Remove any password protection 4) Consider converting scanned documents using OCR software first 5) Keep formatting relatively simple.",
-        tags: ["optimization", "improvement", "document preparation"]
-      },
-      {
-        question: "Can I process protected or sensitive documents?",
-        answer: "Yes, but with caution. While processing happens securely, be careful with confidential or sensitive information. The system doesn't permanently store your document content, but consider removing sensitive details before uploading if you're concerned.",
-        tags: ["security", "privacy", "confidentiality"]
-      },
-      {
-        question: "What was the technical error with my document?",
-        answer: `Your document processing encountered this issue: ${errorDetail.substring(0, 200)}... This typically indicates that the API response couldn't be properly structured into a course or FAQ format.`,
-        tags: ["technical details", "error information", "troubleshooting"]
-      },
-      {
-        question: "What should I do next?",
-        answer: "You can try uploading a different document, converting your current document to another format, or simplifying your document's content and structure. If problems persist, contact support for further assistance.",
-        tags: ["next steps", "solutions", "support"]
+        question: "How can I get better results next time?",
+        answer: "To improve results, try using documents with clear structure and formatting. Break down long documents into smaller, focused ones. Ensure your API key is valid and has sufficient quota remaining. If the issue persists, try a different document or contact support.",
+        tags: ["tips", "improvement", "document"]
       }
     ]
   };

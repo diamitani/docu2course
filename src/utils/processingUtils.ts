@@ -8,6 +8,8 @@ export interface ModuleType {
     options: string[];
     answer: number;
   };
+  activities?: string[];
+  resources?: string[];
 }
 
 export interface CourseType {
@@ -54,7 +56,9 @@ export const processDocument = async (file: File): Promise<{ course: CourseType;
             {
               title: "Document Overview",
               content: "Your document has been analyzed. While we couldn't create a detailed course, we've extracted some basic information.",
-              objectives: ["Understand document content", "Explore key concepts", "Learn document structure"]
+              objectives: ["Understand document content", "Explore key concepts", "Learn document structure"],
+              activities: ["Review the document yourself to identify key sections", "Take notes on important concepts"],
+              resources: ["Original document"]
             }
           ]
         };
