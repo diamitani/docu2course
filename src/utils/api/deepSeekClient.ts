@@ -59,7 +59,7 @@ async function callDeepSeekAPI(prompt: string, apiKey: string): Promise<ApiRespo
         "Authorization": `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: "deepseek-reasoner-32k", // Using the most capable reasoning model for better structure
+        model: "deepseek-chat", // Using the standard deepseek chat model instead of reasoner
         messages: [
           {
             role: "system",

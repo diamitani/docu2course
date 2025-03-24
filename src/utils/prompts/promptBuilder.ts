@@ -1,4 +1,3 @@
-
 /**
  * Builds a prompt for course generation
  * @param fileContent Content of the file to process
