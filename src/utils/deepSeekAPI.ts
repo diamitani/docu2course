@@ -26,6 +26,31 @@ interface DeepSeekResponse {
   };
 }
 
+// Helper function to safely parse JSON with error handling
+const safeJSONParse = (text: string): any => {
+  try {
+    // First try to parse the text directly
+    return JSON.parse(text);
+  } catch (e) {
+    console.log("Initial JSON parse failed, attempting to extract JSON");
+    
+    // If direct parsing fails, try to find JSON within the text
+    // This handles cases where the API returns explanatory text with JSON inside
+    try {
+      const jsonRegex = /{[\s\S]*}/; // Match anything that looks like a JSON object
+      const match = text.match(jsonRegex);
+      if (match && match[0]) {
+        return JSON.parse(match[0]);
+      }
+    } catch (innerError) {
+      console.log("Could not extract JSON from text");
+    }
+    
+    // If we still can't parse it, create a fallback structure
+    return null;
+  }
+};
+
 export const generateCourseFromDocument = async (fileContent: string): Promise<CourseType> => {
   try {
     const prompt = `
@@ -49,9 +74,10 @@ export const generateCourseFromDocument = async (fileContent: string): Promise<C
       }
       
       Extract 3-5 meaningful modules from the document.
+      IMPORTANT: Your entire response must be valid JSON that can be parsed with JSON.parse().
       
       Document content:
-      ${fileContent}
+      ${fileContent.substring(0, 8000)} // Limit content length to avoid token limits
     `;
 
     const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
@@ -79,7 +105,15 @@ export const generateCourseFromDocument = async (fileContent: string): Promise<C
     }
 
     const data: DeepSeekResponse = await response.json();
-    const courseData = JSON.parse(data.choices[0].message.content) as CourseType;
+    const content = data.choices[0].message.content;
+    
+    const courseData = safeJSONParse(content);
+    
+    if (!courseData) {
+      // If we couldn't parse JSON, create a fallback course with the API response
+      console.error("Could not parse course JSON:", content);
+      return createFallbackCourse("Couldn't parse API response into a course structure", content);
+    }
     
     return courseData;
   } catch (error) {
@@ -87,22 +121,7 @@ export const generateCourseFromDocument = async (fileContent: string): Promise<C
     toast.error("Failed to generate course. Please try again.");
     
     // Return a fallback course structure
-    return {
-      title: "Error Processing Document",
-      description: "We encountered an error while processing your document. Please try again or contact support.",
-      modules: [
-        {
-          title: "Error Details",
-          content: `We couldn't process your document. Error: ${error instanceof Error ? error.message : "Unknown error"}`,
-          objectives: ["Try uploading a different document", "Check if the document is in a supported format"],
-          quiz: {
-            question: "What should you do if document processing fails?",
-            options: ["Give up", "Try a different document", "Contact support", "All of the above"],
-            answer: 3
-          }
-        }
-      ]
-    };
+    return createFallbackCourse("Error Processing Document", error instanceof Error ? error.message : "Unknown error");
   }
 };
 
@@ -124,9 +143,10 @@ export const generateFAQFromDocument = async (fileContent: string): Promise<FAQT
       }
       
       Extract 5-7 meaningful questions and answers from the document.
+      IMPORTANT: Your entire response must be valid JSON that can be parsed with JSON.parse().
       
       Document content:
-      ${fileContent}
+      ${fileContent.substring(0, 8000)} // Limit content length to avoid token limits
     `;
 
     const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
@@ -154,7 +174,15 @@ export const generateFAQFromDocument = async (fileContent: string): Promise<FAQT
     }
 
     const data: DeepSeekResponse = await response.json();
-    const faqData = JSON.parse(data.choices[0].message.content) as FAQType;
+    const content = data.choices[0].message.content;
+    
+    const faqData = safeJSONParse(content);
+    
+    if (!faqData) {
+      // If we couldn't parse JSON, create a fallback FAQ with the API response
+      console.error("Could not parse FAQ JSON:", content);
+      return createFallbackFAQ("Couldn't parse API response into a FAQ structure", content);
+    }
     
     return faqData;
   } catch (error) {
@@ -162,23 +190,68 @@ export const generateFAQFromDocument = async (fileContent: string): Promise<FAQT
     toast.error("Failed to generate FAQ. Please try again.");
     
     // Return a fallback FAQ structure
-    return {
-      title: "Error Processing Document",
-      description: "We encountered an error while processing your document. Please try again or contact support.",
-      questions: [
-        {
-          question: "Why did my document processing fail?",
-          answer: `We couldn't process your document. Error: ${error instanceof Error ? error.message : "Unknown error"}. Please try uploading a different document or contact support.`,
-          tags: ["error", "troubleshooting", "support"]
-        },
-        {
-          question: "What document formats are supported?",
-          answer: "We support PDF, TXT, DOC, and DOCX formats. Please ensure your document is in one of these formats and try again.",
-          tags: ["formats", "supported", "requirements"]
-        }
-      ]
-    };
+    return createFallbackFAQ("Error Processing Document", error instanceof Error ? error.message : "Unknown error");
   }
+};
+
+// Helper function to create a fallback course structure
+const createFallbackCourse = (title: string, errorDetail: string): CourseType => {
+  return {
+    title: title,
+    description: "We encountered an error while processing your document. Please try again or contact support.",
+    modules: [
+      {
+        title: "Document Analysis",
+        content: "Our AI attempted to analyze your document but encountered issues. We've created a basic structure instead.\n\nDocument seemed to contain binary or non-text content that was difficult to process.",
+        objectives: ["Try uploading a different document", "Check if the document is in a supported format", "Make sure the document contains text content"],
+        quiz: {
+          question: "What should you do if document processing fails?",
+          options: ["Give up", "Try a different document", "Contact support", "All of the above"],
+          answer: 3
+        }
+      },
+      {
+        title: "Error Details",
+        content: `Technical details about the error:\n\n${errorDetail}`,
+        objectives: ["Understand what went wrong", "Try with a different document format", "Contact support if the issue persists"],
+        quiz: {
+          question: "What document formats work best with our system?",
+          options: ["Binary files", "PDFs with text content", "Text files (.txt, .doc, .docx)", "Image files"],
+          answer: 2
+        }
+      }
+    ]
+  };
+};
+
+// Helper function to create a fallback FAQ structure
+const createFallbackFAQ = (title: string, errorDetail: string): FAQType => {
+  return {
+    title: title,
+    description: "We encountered an error while processing your document. Please try again or contact support.",
+    questions: [
+      {
+        question: "Why did my document processing fail?",
+        answer: `We couldn't properly analyze your document. This could be because it contains binary data, scanned images without OCR, or other non-text content that our system couldn't process effectively.`,
+        tags: ["error", "troubleshooting", "document processing"]
+      },
+      {
+        question: "What document formats are supported?",
+        answer: "We support PDF, TXT, DOC, and DOCX formats. For best results, ensure your PDFs contain actual text (not just scanned images) and are not password protected.",
+        tags: ["formats", "supported", "requirements"]
+      },
+      {
+        question: "How can I improve processing success?",
+        answer: "Try using text-based PDFs, Word documents, or plain text files. If you have a scanned document, consider using an OCR (Optical Character Recognition) tool first to convert it to searchable text.",
+        tags: ["tips", "improvement", "success"]
+      },
+      {
+        question: "Technical error details",
+        answer: `Error information: ${errorDetail}`,
+        tags: ["technical", "error", "details"]
+      }
+    ]
+  };
 };
 
 // Helper function to read the content of a file
@@ -195,11 +268,17 @@ export const readFileContent = (file: File): Promise<string> => {
       reject(error);
     };
     
+    // Improved file type detection and handling
     if (file.type === 'application/pdf') {
-      // For PDF files, we can only get the binary data
-      // In a real app, you'd send this to a backend to extract text
+      // For PDFs, we can either get the text if available or binary data
+      // In a production app, we'd have better PDF parsing on the backend
       reader.readAsDataURL(file);
+    } else if (file.type.includes('image/')) {
+      // Images won't have useful text content
+      reader.readAsDataURL(file);
+      console.log("Warning: Processing image files may not yield good results without OCR");
     } else {
+      // For text-based formats
       reader.readAsText(file);
     }
   });
