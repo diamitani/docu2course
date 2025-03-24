@@ -17,20 +17,23 @@ const ProcessingVisual: React.FC<ProcessingVisualProps> = ({ isProcessing, progr
     "Finalizing"
   ];
   
+  // More detailed descriptions for each step
+  const stepDescriptions = [
+    "Reading and parsing document content...",
+    "Identifying sections and organizing data...",
+    "Creating lessons and quiz elements...",
+    "Generating frequently asked questions...",
+    "Polishing and preparing your results..."
+  ];
+  
   useEffect(() => {
     if (isProcessing) {
-      const interval = setInterval(() => {
-        setCurrentStep((prev) => {
-          // Calculate based on progress ranges
-          if (progress < 20) return 0;
-          if (progress < 40) return 1;
-          if (progress < 60) return 2;
-          if (progress < 80) return 3;
-          return 4;
-        });
-      }, 500); // Update faster for better UX
-      
-      return () => clearInterval(interval);
+      // Use progress ranges to determine current step more reliably
+      if (progress < 20) setCurrentStep(0);
+      else if (progress < 40) setCurrentStep(1);
+      else if (progress < 60) setCurrentStep(2);
+      else if (progress < 80) setCurrentStep(3);
+      else setCurrentStep(4);
     } else {
       setCurrentStep(0);
     }
@@ -43,7 +46,12 @@ const ProcessingVisual: React.FC<ProcessingVisualProps> = ({ isProcessing, progr
       <div className="glass-panel rounded-xl p-6 overflow-hidden">
         <h3 className="text-lg font-medium mb-4">Processing Document</h3>
         
-        <Progress value={progress} className="h-2 mb-6" />
+        <div className="relative mb-6">
+          <Progress value={progress} className="h-2" />
+          <div className="text-xs text-right mt-1 text-muted-foreground">
+            {progress}%
+          </div>
+        </div>
         
         <div className="space-y-4">
           {steps.map((step, index) => (
@@ -58,15 +66,11 @@ const ProcessingVisual: React.FC<ProcessingVisualProps> = ({ isProcessing, progr
                   index + 1
                 )}
               </div>
-              <div>
+              <div className="flex-1">
                 <div className="text-sm font-medium">{step}</div>
                 {index === currentStep && (
                   <div className="text-xs text-muted-foreground">
-                    {index === 0 && "Reading and parsing document content..."}
-                    {index === 1 && "Identifying sections and organizing data..."}
-                    {index === 2 && "Creating lessons and quiz elements..."}
-                    {index === 3 && "Generating frequently asked questions..."}
-                    {index === 4 && "Polishing and preparing output..."}
+                    {stepDescriptions[index]}
                   </div>
                 )}
               </div>
@@ -78,6 +82,12 @@ const ProcessingVisual: React.FC<ProcessingVisualProps> = ({ isProcessing, progr
             </div>
           ))}
         </div>
+        
+        {progress > 90 && (
+          <div className="mt-6 text-xs text-muted-foreground">
+            <p>Almost there! Finalizing your document processing...</p>
+          </div>
+        )}
       </div>
     </div>
   );
