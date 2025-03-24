@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import Layout from '@/components/Layout';
 import PricingSection from '@/components/PricingSection';
 import HeroSection from '@/components/home/HeroSection';
@@ -9,13 +9,7 @@ import UploadSection from '@/components/home/UploadSection';
 import CallToAction from '@/components/home/CallToAction';
 
 const Index = () => {
-  const [hasApiKey, setHasApiKey] = useState(false);
-  
   useEffect(() => {
-    // Check if API key exists in localStorage
-    const apiKey = localStorage.getItem('ai_api_key');
-    setHasApiKey(!!apiKey);
-    
     // Handle hash fragments for navigation
     const handleHashChange = () => {
       const hash = window.location.hash;
@@ -41,7 +35,7 @@ const Index = () => {
     <Layout>
       <HeroSection />
       <HowItWorks />
-      <UploadSection hasApiKey={hasApiKey} setHasApiKey={setHasApiKey} />
+      <UploadSection />
       <FeaturesGrid />
       <PricingSection />
       <CallToAction />

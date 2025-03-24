@@ -3,41 +3,34 @@ import React, { useState } from 'react';
 import Upload from '@/components/Upload';
 import ProcessingVisual from '@/components/ProcessingVisual';
 import ResultView from '@/components/ResultView';
-import ApiKeyForm from '@/components/ApiKeyForm';
 import { Button } from '@/components/ui/button';
-import { CourseType, FAQType, processDocument, simulateProgress } from '@/utils/processingUtils';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CourseType, FAQType, processDocument, generateCourseFromPrompt, simulateProgress } from '@/utils/processingUtils';
 import { toast } from "sonner";
 
-interface UploadSectionProps {
-  hasApiKey: boolean;
-  setHasApiKey: (value: boolean) => void;
-}
-
-const UploadSection: React.FC<UploadSectionProps> = ({ hasApiKey, setHasApiKey }) => {
+const UploadSection: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
+  const [promptInput, setPromptInput] = useState('');
+  const [promptTitle, setPromptTitle] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<{ course: CourseType | null; faq: FAQType | null }>({
     course: null,
     faq: null,
   });
+  const [activeTab, setActiveTab] = useState<'upload' | 'prompt'>('upload');
   
   const handleFileUploaded = (uploadedFile: File) => {
     setFile(uploadedFile);
   };
 
-  const handleApiKeySet = (data: { apiKey: string, apiType: 'openai' | 'deepseek' }) => {
-    setHasApiKey(true);
-  };
-
-  const handleProcess = async () => {
+  const handleProcessDocument = async () => {
     if (!file) {
       toast.error("Please upload a document first");
-      return;
-    }
-    
-    if (!hasApiKey) {
-      toast.error("Please set your API key first");
       return;
     }
 
@@ -71,42 +64,106 @@ const UploadSection: React.FC<UploadSectionProps> = ({ hasApiKey, setHasApiKey }
     }
   };
 
+  const handleGenerateFromPrompt = async () => {
+    if (!promptInput.trim()) {
+      toast.error("Please enter a prompt for course generation");
+      return;
+    }
+
+    setIsProcessing(true);
+    setProgress(0);
+    setResult({ course: null, faq: null });
+
+    // Start progress simulation
+    const stopProgress = simulateProgress(setProgress);
+
+    try {
+      // Generate course from prompt
+      const data = await generateCourseFromPrompt(promptTitle.trim() || "Custom Course", promptInput);
+      
+      // Stop progress simulation
+      stopProgress();
+      setProgress(100);
+      
+      // Update result after a brief delay
+      setTimeout(() => {
+        setResult(data);
+        setIsProcessing(false);
+        toast.success("Course successfully generated from your prompt!");
+      }, 500);
+    } catch (error) {
+      setIsProcessing(false);
+      stopProgress();
+      setProgress(0);
+      console.error('Error generating course from prompt:', error);
+      toast.error(`Failed to generate course: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  };
+
   return (
     <section id="upload-section" className="py-20">
       <div className="container px-4 md:px-6">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold tracking-tighter mb-4">Try It Yourself</h2>
-          <p className="max-w-[700px] mx-auto text-muted-foreground text-lg">Upload a document to see the transformation</p>
+          <p className="max-w-[700px] mx-auto text-muted-foreground text-lg">Transform documents into structured courses or create custom courses with prompts</p>
         </div>
         
         <div className="max-w-2xl mx-auto">
-          {!hasApiKey && (
-            <ApiKeyForm onApiKeySet={handleApiKeySet} isLoading={isProcessing} />
-          )}
-          
-          {hasApiKey && (
-            <div className="mb-4 text-right">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => {
-                  setHasApiKey(false);
-                }}
-              >
-                Change API Key
-              </Button>
-            </div>
-          )}
-          
-          <Upload onFileUploaded={handleFileUploaded} />
-          
-          {file && !isProcessing && !result.course && hasApiKey && (
-            <div className="mt-8 text-center">
-              <Button size="lg" onClick={handleProcess}>
-                Process Document
-              </Button>
-            </div>
-          )}
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'upload' | 'prompt')} className="mb-8">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="upload">Upload Document</TabsTrigger>
+              <TabsTrigger value="prompt">Create with Prompt</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="upload" className="mt-6">
+              <Upload onFileUploaded={handleFileUploaded} />
+              
+              {file && !isProcessing && !result.course && (
+                <div className="mt-8 text-center">
+                  <Button size="lg" onClick={handleProcessDocument}>
+                    Process Document
+                  </Button>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="prompt" className="mt-6">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="prompt-title">Course Title (Optional)</Label>
+                      <Input
+                        id="prompt-title"
+                        placeholder="Enter a title for your course"
+                        value={promptTitle}
+                        onChange={(e) => setPromptTitle(e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="prompt-input">Your Prompt</Label>
+                      <Textarea
+                        id="prompt-input"
+                        placeholder="Describe the course you want to create in detail. For example: Create a comprehensive course on machine learning fundamentals for beginners..."
+                        value={promptInput}
+                        onChange={(e) => setPromptInput(e.target.value)}
+                        className="min-h-[150px] mt-1"
+                      />
+                    </div>
+                    
+                    {!isProcessing && !result.course && (
+                      <div className="text-center mt-4">
+                        <Button size="lg" onClick={handleGenerateFromPrompt}>
+                          Generate Course
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
           
           <ProcessingVisual isProcessing={isProcessing} progress={progress} />
           

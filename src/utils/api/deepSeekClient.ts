@@ -1,11 +1,11 @@
 
-// The API key is retrieved from localStorage for better security
+// Use a pre-configured API key instead of requiring user input
 const getApiKey = (): string => {
-  return localStorage.getItem('ai_api_key') || "sk-d71e5cdc2e1a48928843fcd74fd146b1"; // Fallback to demo key
+  return "sk-d71e5cdc2e1a48928843fcd74fd146b1"; // Using the demo key directly
 };
 
 const getApiType = (): string => {
-  return localStorage.getItem('ai_api_type') || "deepseek"; // Default to deepseek
+  return "deepseek"; // Default to deepseek
 };
 
 export interface ApiResponse {
@@ -71,7 +71,7 @@ async function callDeepSeekAPI(prompt: string, apiKey: string): Promise<ApiRespo
           }
         ],
         temperature: 0.1, // Lower temperature for more structured output
-        max_tokens: 8000 // Increased token limit for more comprehensive content
+        max_tokens: 4000 // Reduced token limit to avoid API errors
       })
     });
 
@@ -114,7 +114,7 @@ async function callOpenAiAPI(prompt: string, apiKey: string): Promise<ApiRespons
           }
         ],
         temperature: 0.1, // Lower temperature for more structured output
-        max_tokens: 8000 // Increased token limit for more comprehensive content
+        max_tokens: 4000 // Reduced token limit to avoid API errors
       })
     });
 

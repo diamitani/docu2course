@@ -31,7 +31,7 @@ export interface FAQType {
 }
 
 // Import DeepSeek API functions from refactored structure
-import { generateCourseFromDocument, generateFAQFromDocument } from './generators/contentGenerators';
+import { generateCourseFromDocument, generateFAQFromDocument, generateCourseFromPromptText } from './generators/contentGenerators';
 import { readFileContent } from './helpers/fileReader';
 import { toast } from "sonner";
 
@@ -84,6 +84,19 @@ export const processDocument = async (file: File): Promise<{ course: CourseType;
     return { course, faq };
   } catch (error) {
     console.error("Error processing document:", error);
+    throw error;
+  }
+};
+
+// Generate a course from a user prompt
+export const generateCourseFromPrompt = async (title: string, promptText: string): Promise<{ course: CourseType; faq: FAQType | null }> => {
+  try {
+    const course = await generateCourseFromPromptText(title, promptText);
+    
+    // For prompt-based generation, we don't generate an FAQ
+    return { course, faq: null };
+  } catch (error) {
+    console.error("Error generating course from prompt:", error);
     throw error;
   }
 };
