@@ -28,8 +28,9 @@ export interface FAQType {
   questions: FAQItemType[];
 }
 
-// Import DeepSeek API functions
-import { generateCourseFromDocument, generateFAQFromDocument, readFileContent } from './deepSeekAPI';
+// Import DeepSeek API functions from refactored structure
+import { generateCourseFromDocument, generateFAQFromDocument } from './generators/contentGenerators';
+import { readFileContent } from './helpers/fileReader';
 import { toast } from "sonner";
 
 // Process document using DeepSeek API
