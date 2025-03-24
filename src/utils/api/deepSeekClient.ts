@@ -62,11 +62,15 @@ async function callDeepSeekAPI(prompt: string, apiKey: string): Promise<ApiRespo
         model: "deepseek-chat",
         messages: [
           {
+            role: "system",
+            content: "You are an expert document parser and content structurer. Your output should be only valid JSON without any other text. Always ensure your response can be parsed with JSON.parse()."
+          },
+          {
             role: "user",
             content: prompt
           }
         ],
-        temperature: 0.5, // Lower temperature for more structured output
+        temperature: 0.2, // Lower temperature for more structured output
         max_tokens: 4000
       })
     });
@@ -101,11 +105,15 @@ async function callOpenAiAPI(prompt: string, apiKey: string): Promise<ApiRespons
         model: "gpt-3.5-turbo", // Use a suitable OpenAI model
         messages: [
           {
+            role: "system",
+            content: "You are an expert document parser and content structurer. Your output should be only valid JSON without any other text. Always ensure your response can be parsed with JSON.parse()."
+          },
+          {
             role: "user",
             content: prompt
           }
         ],
-        temperature: 0.5,
+        temperature: 0.2, // Lower temperature for more structured output
         max_tokens: 4000
       })
     });

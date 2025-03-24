@@ -13,20 +13,33 @@ import { buildCoursePrompt, buildFAQPrompt } from '../prompts/promptBuilder';
  */
 export const generateCourseFromDocument = async (fileContent: string): Promise<CourseType> => {
   try {
+    toast.info("Generating course structure...");
     const prompt = buildCoursePrompt(fileContent);
-    const data = await callAiApi(prompt);
-    const content = data.choices[0].message.content;
+    console.log("Sending request to AI API for course generation");
     
+    const data = await callAiApi(prompt);
+    console.log("Received response from AI API");
+    
+    const content = data.choices[0].message.content;
     console.log("API Response content sample:", content.substring(0, 200) + "...");
     
     const courseData = safeJSONParse(content);
     
     if (!courseData) {
       // If we couldn't parse JSON, create a fallback course with the API response
-      console.error("Could not parse course JSON:", content);
+      console.error("Could not parse course JSON from API response");
+      toast.error("Failed to parse the AI response. Using a simplified course structure.");
       return createFallbackCourse("Couldn't parse API response into a course structure", content);
     }
     
+    // Validate the course structure
+    if (!courseData.title || !courseData.description || !Array.isArray(courseData.modules) || courseData.modules.length === 0) {
+      console.error("Invalid course structure:", courseData);
+      toast.error("The course structure is incomplete. Using a simplified course.");
+      return createFallbackCourse("Incomplete course structure from API", JSON.stringify(courseData));
+    }
+    
+    toast.success("Course structure generated successfully!");
     return courseData;
   } catch (error) {
     console.error("Error generating course:", error);
@@ -44,20 +57,33 @@ export const generateCourseFromDocument = async (fileContent: string): Promise<C
  */
 export const generateFAQFromDocument = async (fileContent: string): Promise<FAQType> => {
   try {
+    toast.info("Generating FAQ knowledge base...");
     const prompt = buildFAQPrompt(fileContent);
-    const data = await callAiApi(prompt);
-    const content = data.choices[0].message.content;
+    console.log("Sending request to AI API for FAQ generation");
     
+    const data = await callAiApi(prompt);
+    console.log("Received response from AI API");
+    
+    const content = data.choices[0].message.content;
     console.log("FAQ API Response content sample:", content.substring(0, 200) + "...");
     
     const faqData = safeJSONParse(content);
     
     if (!faqData) {
       // If we couldn't parse JSON, create a fallback FAQ with the API response
-      console.error("Could not parse FAQ JSON:", content);
+      console.error("Could not parse FAQ JSON from API response");
+      toast.error("Failed to parse the AI response. Using a simplified FAQ structure.");
       return createFallbackFAQ("Couldn't parse API response into a FAQ structure", content);
     }
     
+    // Validate the FAQ structure
+    if (!faqData.title || !faqData.description || !Array.isArray(faqData.questions) || faqData.questions.length === 0) {
+      console.error("Invalid FAQ structure:", faqData);
+      toast.error("The FAQ structure is incomplete. Using a simplified FAQ.");
+      return createFallbackFAQ("Incomplete FAQ structure from API", JSON.stringify(faqData));
+    }
+    
+    toast.success("FAQ knowledge base generated successfully!");
     return faqData;
   } catch (error) {
     console.error("Error generating FAQ:", error);
