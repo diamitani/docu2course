@@ -59,19 +59,19 @@ async function callDeepSeekAPI(prompt: string, apiKey: string): Promise<ApiRespo
         "Authorization": `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: "deepseek-chat",
+        model: "deepseek-reasoner-32k", // Using the most capable reasoning model for better structure
         messages: [
           {
             role: "system",
-            content: "You are an expert document parser and content structurer. Your output should be only valid JSON without any other text. Always ensure your response can be parsed with JSON.parse()."
+            content: "You are an expert document parser and content structurer. Your output should be only valid JSON without any other text. Always ensure your response can be parsed with JSON.parse(). Create comprehensive educational content with multiple modules and detailed lessons."
           },
           {
             role: "user",
             content: prompt
           }
         ],
-        temperature: 0.2, // Lower temperature for more structured output
-        max_tokens: 4000
+        temperature: 0.1, // Lower temperature for more structured output
+        max_tokens: 8000 // Increased token limit for more comprehensive content
       })
     });
 
@@ -102,19 +102,19 @@ async function callOpenAiAPI(prompt: string, apiKey: string): Promise<ApiRespons
         "Authorization": `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo", // Use a suitable OpenAI model
+        model: "gpt-4-turbo", // Using the most capable OpenAI model
         messages: [
           {
             role: "system",
-            content: "You are an expert document parser and content structurer. Your output should be only valid JSON without any other text. Always ensure your response can be parsed with JSON.parse()."
+            content: "You are an expert document parser and content structurer. Your output should be only valid JSON without any other text. Always ensure your response can be parsed with JSON.parse(). Create comprehensive educational content with multiple modules and detailed lessons."
           },
           {
             role: "user",
             content: prompt
           }
         ],
-        temperature: 0.2, // Lower temperature for more structured output
-        max_tokens: 4000
+        temperature: 0.1, // Lower temperature for more structured output
+        max_tokens: 8000 // Increased token limit for more comprehensive content
       })
     });
 

@@ -1,3 +1,4 @@
+
 /**
  * Builds a prompt for course generation
  * @param fileContent Content of the file to process
@@ -13,19 +14,20 @@ export const buildCoursePrompt = (fileContent: string): string => {
     You MUST follow these requirements:
     1. Carefully analyze the document content, even if it's encoded or in a special format
     2. Extract key concepts, topics, and learning points to create a logical learning progression
-    3. Create a COMPREHENSIVE course structure with 3-7 meaningful modules
+    3. Create a COMPREHENSIVE course structure with EXACTLY 5-7 meaningful modules
     4. Each module MUST include:
        - A descriptive title
-       - Detailed content in markdown format
+       - Detailed content in markdown format that is at least 2-3 paragraphs long
        - 3-5 specific learning objectives
        - A quiz question with multiple-choice options
-       - At least one practical activity or exercise
+       - At least two practical activities or exercises
        - Recommended resources for further study
     5. Format all content in valid, parseable JSON exactly matching the structure below
     6. Do not include any text outside the JSON structure
     7. Ensure JSON is properly formatted and can be parsed with JSON.parse()
     8. Create a cohesive course that flows logically from basic to advanced concepts
     9. Aim for educational depth rather than breadth - provide substantial content for each topic
+    10. Make sure each module has at least 250-300 words of content
 
     ### OUTPUT FORMAT ###
     Your output MUST be a JSON object with this exact structure:
@@ -35,7 +37,7 @@ export const buildCoursePrompt = (fileContent: string): string => {
       "modules": [
         {
           "title": "Module title",
-          "content": "Detailed module content in markdown format covering key concepts thoroughly",
+          "content": "Detailed module content in markdown format covering key concepts thoroughly. This should be at least 2-3 paragraphs and contain 250-300 words minimum.",
           "objectives": ["specific learning objective 1", "specific learning objective 2", "specific learning objective 3"],
           "quiz": {
             "question": "A thought-provoking question that tests understanding of this module",
@@ -68,8 +70,8 @@ export const buildFAQPrompt = (fileContent: string): string => {
     You MUST follow these requirements:
     1. Carefully analyze the document content, even if it's encoded or in a special format
     2. Identify common questions that would be asked about this content
-    3. Create 7-10 meaningful question and answer pairs, covering different aspects of the content
-    4. Each FAQ item must include a clear question, comprehensive answer, and relevant tags
+    3. Create 10-15 meaningful question and answer pairs, covering different aspects of the content
+    4. Each FAQ item must include a clear question, comprehensive answer (at least 100 words), and relevant tags
     5. Format all content in valid, parseable JSON exactly matching the structure below
     6. Do not include any text outside the JSON structure
     7. Ensure JSON is properly formatted and can be parsed with JSON.parse()
@@ -83,7 +85,7 @@ export const buildFAQPrompt = (fileContent: string): string => {
       "questions": [
         {
           "question": "A frequently asked question from the document",
-          "answer": "Detailed answer to the question with specific guidance",
+          "answer": "Detailed answer to the question with specific guidance. This should be at least 100 words and provide thorough information.",
           "tags": ["relevant", "tag", "keywords"]
         }
       ]
