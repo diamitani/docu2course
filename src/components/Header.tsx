@@ -36,7 +36,6 @@ const Header: React.FC = () => {
         <nav className="hidden md:flex items-center space-x-8">
           <Link to="/#features" className="text-sm font-medium hover:text-primary transition-colors">Features</Link>
           <Link to="/#how-it-works" className="text-sm font-medium hover:text-primary transition-colors">How It Works</Link>
-          <Link to="/#examples" className="text-sm font-medium hover:text-primary transition-colors">Examples</Link>
           <Link to="/rag-framework" className="text-sm font-medium hover:text-primary transition-colors">RAG Framework</Link>
           <Link to="/faq" className="text-sm font-medium hover:text-primary transition-colors">FAQ</Link>
           <Button variant="default" size="sm" className="ml-4" onClick={() => document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth' })}>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/Layout';
 import { Card } from '@/components/ui/card';
@@ -10,7 +9,12 @@ const RAGFramework = () => {
   const navigate = useNavigate();
 
   const handleTryNow = () => {
-    navigate('/#upload-section');
+    // Navigate to the home page and scroll to upload section
+    navigate('/');
+    // Use setTimeout to ensure navigation completes before scrolling
+    setTimeout(() => {
+      document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   };
 
   return (
@@ -147,8 +151,12 @@ const RAGFramework = () => {
             <p className="text-lg text-muted-foreground mb-8">
               Experience the power of our RAG-based framework to convert your static documents into dynamic learning resources.
             </p>
-            <Button onClick={handleTryNow} className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
-              Upload Your Document
+            <Button 
+              onClick={handleTryNow} 
+              size="lg"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all"
+            >
+              Try It Now - Upload Your Document
             </Button>
           </div>
         </div>
