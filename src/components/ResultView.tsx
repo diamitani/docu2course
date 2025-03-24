@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { CourseType, FAQType } from '@/utils/processingUtils';
+import { toast } from "sonner";
 
 interface ResultViewProps {
   course: CourseType | null;
@@ -14,6 +15,66 @@ const ResultView: React.FC<ResultViewProps> = ({ course, faq }) => {
   const [activeLesson, setActiveLesson] = useState(0);
   
   if (!course && !faq) return null;
+
+  const handleDownload = () => {
+    try {
+      // Determine which content to download based on active tab
+      const contentType = document.querySelector('[role="tablist"] [data-state="active"]')?.getAttribute('value') || 'course';
+      
+      let content = '';
+      let filename = '';
+      
+      if (contentType === 'course' && course) {
+        filename = `${course.title.replace(/\s+/g, '_').toLowerCase()}.md`;
+        content = `# ${course.title}\n\n${course.description}\n\n`;
+        
+        course.modules.forEach((module, index) => {
+          content += `## Module ${index + 1}: ${module.title}\n\n`;
+          content += `### Learning Objectives\n\n`;
+          module.objectives.forEach(obj => {
+            content += `- ${obj}\n`;
+          });
+          content += `\n### Content\n\n${module.content}\n\n`;
+          
+          if (module.quiz) {
+            content += `### Knowledge Check\n\n`;
+            content += `Question: ${module.quiz.question}\n\n`;
+            content += `Options:\n`;
+            module.quiz.options.forEach((opt, i) => {
+              content += `${i + 1}. ${opt}\n`;
+            });
+            content += `\nCorrect Answer: ${module.quiz.options[module.quiz.answer || 0]}\n\n`;
+          }
+        });
+      } else if (contentType === 'faq' && faq) {
+        filename = `${faq.title.replace(/\s+/g, '_').toLowerCase()}_faq.md`;
+        content = `# ${faq.title}\n\n${faq.description}\n\n`;
+        
+        faq.questions.forEach((q, index) => {
+          content += `## Q${index + 1}: ${q.question}\n\n${q.answer}\n\n`;
+        });
+      } else {
+        toast.error("No content available to download");
+        return;
+      }
+      
+      // Create a blob and trigger download
+      const blob = new Blob([content], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast.success(`Downloaded ${filename}`);
+    } catch (error) {
+      console.error("Download error:", error);
+      toast.error("Failed to download content");
+    }
+  };
 
   return (
     <div className="animate-fade-in">
@@ -142,7 +203,7 @@ const ResultView: React.FC<ResultViewProps> = ({ course, faq }) => {
         </Tabs>
         
         <div className="flex justify-end mt-6 space-x-3">
-          <Button variant="outline">Download</Button>
+          <Button variant="outline" onClick={handleDownload}>Download</Button>
           <Button>Save to Library</Button>
         </div>
       </div>

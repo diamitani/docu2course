@@ -1,9 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import Upload from '@/components/Upload';
 import ProcessingVisual from '@/components/ProcessingVisual';
 import ResultView from '@/components/ResultView';
+import ApiKeyForm from '@/components/ApiKeyForm';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CourseType, FAQType, processDocument, simulateProgress } from '@/utils/processingUtils';
@@ -17,14 +18,30 @@ const Index = () => {
     course: null,
     faq: null,
   });
+  const [hasApiKey, setHasApiKey] = useState(false);
+  
+  useEffect(() => {
+    // Check if API key exists in localStorage
+    const apiKey = localStorage.getItem('ai_api_key');
+    setHasApiKey(!!apiKey);
+  }, []);
 
   const handleFileUploaded = (uploadedFile: File) => {
     setFile(uploadedFile);
   };
 
+  const handleApiKeySet = (data: { apiKey: string, apiType: 'openai' | 'deepseek' }) => {
+    setHasApiKey(true);
+  };
+
   const handleProcess = async () => {
     if (!file) {
       toast.error("Please upload a document first");
+      return;
+    }
+    
+    if (!hasApiKey) {
+      toast.error("Please set your API key first");
       return;
     }
 
@@ -36,7 +53,7 @@ const Index = () => {
     const stopProgress = simulateProgress(setProgress);
 
     try {
-      // Process the document using DeepSeek API
+      // Process the document using the selected API
       const data = await processDocument(file);
       
       // Stop progress simulation
@@ -54,7 +71,7 @@ const Index = () => {
       stopProgress();
       setProgress(0);
       console.error('Error processing document:', error);
-      toast.error("Failed to process document. Please try again.");
+      toast.error(`Failed to process document: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   };
 
@@ -165,9 +182,27 @@ const Index = () => {
           </div>
           
           <div className="max-w-2xl mx-auto">
+            {!hasApiKey && (
+              <ApiKeyForm onApiKeySet={handleApiKeySet} isLoading={isProcessing} />
+            )}
+            
+            {hasApiKey && (
+              <div className="mb-4 text-right">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => {
+                    setHasApiKey(false);
+                  }}
+                >
+                  Change API Key
+                </Button>
+              </div>
+            )}
+            
             <Upload onFileUploaded={handleFileUploaded} />
             
-            {file && !isProcessing && !result.course && (
+            {file && !isProcessing && !result.course && hasApiKey && (
               <div className="mt-8 text-center">
                 <Button size="lg" onClick={handleProcess}>
                   Process Document
