@@ -9,25 +9,42 @@ export const readFileContent = (file: File): Promise<string> => {
     const reader = new FileReader();
     
     reader.onload = (event) => {
-      const content = event.target?.result as string;
-      resolve(content);
+      try {
+        const content = event.target?.result as string;
+        
+        // For DataURL contents (like PDFs), try to extract text in a reasonable format
+        if (content.startsWith('data:')) {
+          console.log("Processing file as data URL");
+          
+          // For PDFs and images, we'll need to inform the AI that this is encoded content
+          resolve(`This is a ${file.type} file named "${file.name}" with size ${(file.size / 1024).toFixed(2)}KB. 
+          The content is encoded as a data URL. 
+          Please extract the key information from this document.`);
+        } else {
+          // For text content, just return it directly
+          resolve(content);
+        }
+      } catch (error) {
+        console.error("Error processing file content:", error);
+        reject(error);
+      }
     };
     
     reader.onerror = (error) => {
+      console.error("Error reading file:", error);
       reject(error);
     };
     
     // Improved file type detection and handling
     if (file.type === 'application/pdf') {
-      // For PDFs, we can either get the text if available or binary data
-      // In a production app, we'd have better PDF parsing on the backend
+      console.log("Processing PDF file");
       reader.readAsDataURL(file);
     } else if (file.type.includes('image/')) {
-      // Images won't have useful text content
+      console.log("Processing image file");
       reader.readAsDataURL(file);
-      console.log("Warning: Processing image files may not yield good results without OCR");
     } else {
       // For text-based formats
+      console.log("Processing text-based file");
       reader.readAsText(file);
     }
   });

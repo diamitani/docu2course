@@ -1,7 +1,7 @@
 
 import { CourseType, FAQType } from '../processingUtils';
 import { toast } from "sonner";
-import { callDeepSeekAPI } from '../api/deepSeekClient';
+import { callAiApi } from '../api/deepSeekClient';
 import { safeJSONParse } from '../helpers/jsonParser';
 import { createFallbackCourse, createFallbackFAQ } from '../fallbacks/contentFallbacks';
 import { buildCoursePrompt, buildFAQPrompt } from '../prompts/promptBuilder';
@@ -14,7 +14,7 @@ import { buildCoursePrompt, buildFAQPrompt } from '../prompts/promptBuilder';
 export const generateCourseFromDocument = async (fileContent: string): Promise<CourseType> => {
   try {
     const prompt = buildCoursePrompt(fileContent);
-    const data = await callDeepSeekAPI(prompt);
+    const data = await callAiApi(prompt);
     const content = data.choices[0].message.content;
     
     console.log("API Response content sample:", content.substring(0, 200) + "...");
@@ -45,7 +45,7 @@ export const generateCourseFromDocument = async (fileContent: string): Promise<C
 export const generateFAQFromDocument = async (fileContent: string): Promise<FAQType> => {
   try {
     const prompt = buildFAQPrompt(fileContent);
-    const data = await callDeepSeekAPI(prompt);
+    const data = await callAiApi(prompt);
     const content = data.choices[0].message.content;
     
     console.log("FAQ API Response content sample:", content.substring(0, 200) + "...");

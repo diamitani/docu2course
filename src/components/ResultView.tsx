@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -52,6 +51,7 @@ const ResultView: React.FC<ResultViewProps> = ({ course, faq }) => {
         
         faq.questions.forEach((q, index) => {
           content += `## Q${index + 1}: ${q.question}\n\n${q.answer}\n\n`;
+          content += `Tags: ${q.tags.join(', ')}\n\n`;
         });
       } else {
         toast.error("No content available to download");
@@ -193,6 +193,13 @@ const ResultView: React.FC<ResultViewProps> = ({ course, faq }) => {
                       </summary>
                       <div className="mt-3 text-muted-foreground">
                         <p className="whitespace-pre-line">{item.answer}</p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {item.tags.map((tag, tagIndex) => (
+                            <span key={tagIndex} className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </details>
                   ))}

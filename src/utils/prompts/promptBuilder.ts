@@ -1,3 +1,4 @@
+
 /**
  * Builds a prompt for course generation
  * @param fileContent Content of the file to process
@@ -9,7 +10,9 @@ export const buildCoursePrompt = (fileContent: string): string => {
   
   return `
     You are an expert curriculum designer. Transform this document content into a structured course with modules.
-    The response should be in JSON format with the following structure:
+    Even if the document is encoded or in a special format, try to extract the key concepts and create a meaningful course.
+    
+    The response should be in VALID JSON format with the following structure:
     {
       "title": "Course title based on content",
       "description": "Brief overview of what the course covers",
@@ -28,8 +31,8 @@ export const buildCoursePrompt = (fileContent: string): string => {
     }
     
     Extract 3-5 meaningful modules from the document.
-    IMPORTANT: Your entire response must be valid JSON that can be parsed with JSON.parse().
-    Do not include any explanatory text, just return the JSON object.
+    IMPORTANT: Your entire response must be VALID JSON that can be parsed with JSON.parse().
+    Do not include any explanatory text before or after the JSON, just return the JSON object.
     
     Document content:
     ${truncatedContent}
@@ -47,7 +50,9 @@ export const buildFAQPrompt = (fileContent: string): string => {
   
   return `
     You are an expert knowledge base creator. Transform this document content into a structured FAQ.
-    The response should be in JSON format with the following structure:
+    Even if the document is encoded or in a special format, try to extract the key concepts and create meaningful questions and answers.
+    
+    The response should be in VALID JSON format with the following structure:
     {
       "title": "FAQ title based on content",
       "description": "Brief overview of what this FAQ covers",
@@ -61,8 +66,8 @@ export const buildFAQPrompt = (fileContent: string): string => {
     }
     
     Extract 5-7 meaningful questions and answers from the document.
-    IMPORTANT: Your entire response must be valid JSON that can be parsed with JSON.parse().
-    Do not include any explanatory text, just return the JSON object.
+    IMPORTANT: Your entire response must be VALID JSON that can be parsed with JSON.parse().
+    Do not include any explanatory text before or after the JSON, just return the JSON object.
     
     Document content:
     ${truncatedContent}

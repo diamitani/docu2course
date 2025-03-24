@@ -43,16 +43,33 @@ const Upload: React.FC<UploadProps> = ({ onFileUploaded }) => {
   };
   
   const handleFile = (selectedFile: File) => {
-    const allowedTypes = ['application/pdf', 'text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    // Support more file types, especially PDF
+    const allowedTypes = [
+      'application/pdf', 
+      'text/plain', 
+      'application/msword', 
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/markdown',
+      'text/html',
+      'text/csv'
+    ];
     
-    if (!allowedTypes.includes(selectedFile.type)) {
-      toast.error("Please upload a PDF, TXT, or DOC file");
+    // Check file size
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (selectedFile.size > maxSize) {
+      toast.error("File size exceeds 10MB limit");
       return;
+    }
+    
+    // Just show a warning for unsupported file types, but still process them
+    if (!allowedTypes.includes(selectedFile.type)) {
+      toast.warning(`File type '${selectedFile.type}' is not officially supported. We'll try to process it, but results may vary.`);
+    } else {
+      toast.success(`File "${selectedFile.name}" uploaded successfully`);
     }
     
     setFile(selectedFile);
     onFileUploaded(selectedFile);
-    toast.success(`File "${selectedFile.name}" uploaded successfully`);
   };
 
   return (
@@ -68,7 +85,7 @@ const Upload: React.FC<UploadProps> = ({ onFileUploaded }) => {
         ref={fileInputRef}
         className="hidden"
         onChange={handleFileInputChange}
-        accept=".pdf,.txt,.doc,.docx"
+        accept=".pdf,.txt,.doc,.docx,.md,.html,.csv"
       />
       
       <div className="flex flex-col items-center justify-center text-center">
@@ -96,7 +113,7 @@ const Upload: React.FC<UploadProps> = ({ onFileUploaded }) => {
             </div>
             <h3 className="text-xl font-medium mb-2">Upload Your Document</h3>
             <p className="text-sm text-muted-foreground mb-4">Drag and drop your file here, or click to browse</p>
-            <p className="text-xs text-muted-foreground">Supports PDF, TXT, DOC, DOCX (Max 10MB)</p>
+            <p className="text-xs text-muted-foreground">Supports PDF, TXT, DOC, DOCX, MD, HTML, CSV (Max 10MB)</p>
           </>
         )}
       </div>
