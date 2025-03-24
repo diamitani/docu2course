@@ -38,7 +38,8 @@ const Header: React.FC = () => {
           <Link to="/#how-it-works" className="text-sm font-medium hover:text-primary transition-colors">How It Works</Link>
           <Link to="/#examples" className="text-sm font-medium hover:text-primary transition-colors">Examples</Link>
           <Link to="/rag-framework" className="text-sm font-medium hover:text-primary transition-colors">RAG Framework</Link>
-          <Button variant="default" size="sm" className="ml-4">
+          <Link to="/faq" className="text-sm font-medium hover:text-primary transition-colors">FAQ</Link>
+          <Button variant="default" size="sm" className="ml-4" onClick={() => document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth' })}>
             Get Started
           </Button>
         </nav>

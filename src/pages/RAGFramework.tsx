@@ -3,8 +3,16 @@ import React from 'react';
 import Layout from '@/components/Layout';
 import { Card } from '@/components/ui/card';
 import RagArchitectureDiagram from '@/components/RagArchitectureDiagram';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const RAGFramework = () => {
+  const navigate = useNavigate();
+
+  const handleTryNow = () => {
+    navigate('/#upload-section');
+  };
+
   return (
     <Layout>
       <section className="pt-20 pb-16">
@@ -52,13 +60,13 @@ const RAGFramework = () => {
                 <div className="border-l-4 border-primary pl-4">
                   <h3 className="text-xl font-medium mb-2">RAG Engine</h3>
                   <p className="text-sm text-muted-foreground mb-1"><strong>Functionality:</strong> User queries trigger retrieval of relevant content, which is synthesized into training modules or FAQs.</p>
-                  <p className="text-sm text-muted-foreground"><strong>Technology:</strong> AWS Bedrock provides the language model, with Lambda functions orchestrating retrieval and generation.</p>
+                  <p className="text-sm text-muted-foreground"><strong>Technology:</strong> DeepSeek's language model provides the base for generation, with Lambda functions orchestrating retrieval and generation processes.</p>
                 </div>
 
                 <div className="border-l-4 border-primary pl-4">
                   <h3 className="text-xl font-medium mb-2">Output Layer</h3>
                   <p className="text-sm text-muted-foreground mb-1"><strong>Functionality:</strong> Generated content is delivered as HTML lessons or query responses.</p>
-                  <p className="text-sm text-muted-foreground"><strong>Technology:</strong> A Flask-based microservice serves dynamic content, hosted on AWS Elastic Beanstalk.</p>
+                  <p className="text-sm text-muted-foreground"><strong>Technology:</strong> A React-based frontend serves dynamic content, hosted on AWS services.</p>
                 </div>
               </div>
             </Card>
@@ -68,7 +76,7 @@ const RAGFramework = () => {
                 <h2 className="text-2xl font-semibold mb-4">Benefits</h2>
                 <ul className="space-y-2 list-disc pl-5">
                   <li><strong>Efficiency:</strong> Reduces manual content creation time from hours to minutes.</li>
-                  <li><strong>Scalability:</strong> Adapts to diverse domains using AWS's robust infrastructure.</li>
+                  <li><strong>Scalability:</strong> Adapts to diverse domains using cloud infrastructure.</li>
                   <li><strong>Accessibility:</strong> Delivers tailored, easy-to-understand insights for non-expert users.</li>
                 </ul>
               </Card>
@@ -97,45 +105,23 @@ const RAGFramework = () => {
             </Card>
 
             <Card className="p-6 mb-8">
-              <h2 className="text-2xl font-semibold mb-4">Technical Implementation: RankAndRetrieve Algorithm</h2>
+              <h2 className="text-2xl font-semibold mb-4">Technical Implementation: Document Processing Algorithm</h2>
               <p className="mb-4">
-                The RAG engine incorporates a custom RankAndRetrieve function to balance authoritative ("Goliath") and emerging ("David") sources, ensuring diverse, high-quality outputs.
+                Our document transformation process uses DeepSeek AI to analyze and structure content effectively:
               </p>
               <div className="bg-black text-white p-4 rounded-md overflow-x-auto text-sm font-mono">
-                <pre>{`Function RankAndRetrieve(query):
-    # Define source rankings by category
-    SourceRankings = {
-        "Technology": {"Google Research": 0.92, "MIT CSAIL": 0.87},
-        "Health": {"Mayo Clinic": 0.83, "WHO": 0.85}
-    }
-    
-    # Categorize query
-    category = CategorizeQuery(query)
-    
-    # Retrieve top-tier sources
-    topSources = SortByScore(SourceRankings[category], descending=True)
-    topTierResults = {}
-    for source, score in topSources[:4]:
-        content = RetrieveContent(source, query)
-        topTierResults[source] = {"content": content, "score": score * 0.9}
-    
-    # Incorporate emerging sources
-    emergingSources = FetchTrendingSources(query, platforms=["web", "X"])
-    davidResults = {}
-    for source in emergingSources:
-        relevance = AssessRelevance(source, query)
-        if relevance > 0.65:
-            content = RetrieveContent(source, query)
-            davidResults[source] = {"content": content, "score": relevance}
-    
-    # Combine and weight results
-    allResults = MergeDictionaries(topTierResults, davidResults)
-    for source, data in allResults.items():
-        data["finalScore"] = data["score"] * (0.8 if source in topSources else 0.5)
-    
-    # Sort and return
-    sortedResults = SortByScore(allResults, key="finalScore", descending=True)
-    return sortedResults[:12]`}</pre>
+                <pre>{`// Document Processing Flow
+1. User uploads document (PDF, DOC, TXT)
+2. Content extraction based on document type
+3. DeepSeek API analyzes the document content:
+   - Identifies key topics and concepts
+   - Creates logical structure for curriculum
+   - Generates learning objectives
+   - Creates assessment questions
+4. Results are formatted into:
+   - Course with modules, objectives, and quizzes
+   - FAQ with categorized questions and answers
+5. Content is presented to user via interactive UI`}</pre>
               </div>
             </Card>
 
@@ -145,9 +131,9 @@ const RAGFramework = () => {
                 The RAG-Based Knowledge Transformation Framework offers a scalable, AI-driven solution to bridge the gap between raw documents and actionable knowledge. By automating content synthesis, it saves time, enhances accessibility, and supports diverse applications—positioning it as a valuable tool for education, healthcare, and policy innovation.
               </p>
               <div className="flex justify-center mt-6">
-                <a href="/#upload-section" className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                <Button onClick={handleTryNow} className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
                   Try Our Implementation
-                </a>
+                </Button>
               </div>
             </Card>
           </div>
@@ -161,9 +147,9 @@ const RAGFramework = () => {
             <p className="text-lg text-muted-foreground mb-8">
               Experience the power of our RAG-based framework to convert your static documents into dynamic learning resources.
             </p>
-            <a href="/#upload-section" className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+            <Button onClick={handleTryNow} className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
               Upload Your Document
-            </a>
+            </Button>
           </div>
         </div>
       </section>

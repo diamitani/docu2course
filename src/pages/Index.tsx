@@ -7,6 +7,7 @@ import ResultView from '@/components/ResultView';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CourseType, FAQType, processDocument, simulateProgress } from '@/utils/processingUtils';
+import { toast } from "sonner";
 
 const Index = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -22,7 +23,10 @@ const Index = () => {
   };
 
   const handleProcess = async () => {
-    if (!file) return;
+    if (!file) {
+      toast.error("Please upload a document first");
+      return;
+    }
 
     setIsProcessing(true);
     setProgress(0);
@@ -32,7 +36,7 @@ const Index = () => {
     const stopProgress = simulateProgress(setProgress);
 
     try {
-      // Process the document
+      // Process the document using DeepSeek API
       const data = await processDocument(file);
       
       // Stop progress simulation
@@ -43,10 +47,14 @@ const Index = () => {
       setTimeout(() => {
         setResult(data);
         setIsProcessing(false);
+        toast.success("Document successfully transformed!");
       }, 500);
     } catch (error) {
       setIsProcessing(false);
+      stopProgress();
+      setProgress(0);
       console.error('Error processing document:', error);
+      toast.error("Failed to process document. Please try again.");
     }
   };
 
