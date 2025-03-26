@@ -24,6 +24,15 @@ const Header: React.FC = () => {
     setMenuOpen(false);
   };
 
+  const handleFeaturesClick = (e: React.MouseEvent) => {
+    // Check if we're on the index page
+    if (window.location.pathname === '/') {
+      e.preventDefault();
+      document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+      handleNavClick();
+    }
+  };
+
   return (
     <header 
       className={cn(
@@ -47,7 +56,7 @@ const Header: React.FC = () => {
           <Link 
             to="/#features" 
             className="text-sm font-medium hover:text-primary transition-colors"
-            onClick={handleNavClick}
+            onClick={handleFeaturesClick}
           >
             Features
           </Link>

@@ -1,4 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import PricingSection from '@/components/PricingSection';
 import HeroSection from '@/components/home/HeroSection';
@@ -7,10 +9,13 @@ import FeaturesGrid from '@/components/home/FeaturesGrid';
 import UploadSection from '@/components/home/UploadSection';
 import CallToAction from '@/components/home/CallToAction';
 import PaymentSuccess from '@/components/PaymentSuccess';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "sonner";
 
 const Index = () => {
   const [showSuccessPage, setShowSuccessPage] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check for success or canceled payment
@@ -29,6 +34,17 @@ const Index = () => {
       // Clear the URL parameters
       window.history.replaceState({}, document.title, window.location.pathname);
     }
+
+    // Check if user is authenticated
+    const checkAuth = async () => {
+      const authenticated = await isAuthenticated();
+      if (authenticated) {
+        // User is logged in, you can optionally redirect or update UI
+        console.log('User is authenticated');
+      }
+    };
+    
+    checkAuth();
 
     // Handle hash fragments for navigation
     const handleHashChange = () => {
@@ -49,7 +65,7 @@ const Index = () => {
     // Add event listener for hash changes
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+  }, [isAuthenticated]);
 
   if (showSuccessPage) {
     return (
