@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import Layout from '@/components/Layout';
 import PricingSection from '@/components/PricingSection';
@@ -18,11 +17,13 @@ const Index = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const success = urlParams.get('success');
     const canceled = urlParams.get('canceled');
+    const plan = urlParams.get('plan');
 
     if (success === 'true') {
       setShowSuccessPage(true);
-      // Clear the URL parameters
-      window.history.replaceState({}, document.title, window.location.pathname);
+      // Keep the plan parameter but remove other URL parameters
+      window.history.replaceState({}, document.title, 
+        plan ? `${window.location.pathname}?plan=${plan}` : window.location.pathname);
     } else if (canceled === 'true') {
       toast.error("Payment was canceled. You can try again anytime.");
       // Clear the URL parameters

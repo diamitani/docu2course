@@ -9,33 +9,41 @@ import { toast } from "sonner";
 // Initialize Stripe with the publishable key
 const stripePromise = loadStripe('pk_live_51QzjjzB2toh1Zq62emo5ayCdY1v9WF5N66qaJwMtfxmY1PHUbyqxMZ7qrOEvmi38BlpfNBTAsAt6OD4o0l6gPYus00zH6XXfPV');
 
+// Stripe price IDs for the different plans
+const STRIPE_PRICES = {
+  monthly: 'price_1SGUo4B2toh1Zq62eHFPEgjc',  // $5/month 
+  yearly: 'price_1SGUp2B2toh1Zq62zChcEWI4'    // $20/year
+};
+
 const PricingSection: React.FC = () => {
   const handleFreePlan = () => {
     document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth' });
     toast.success("You're using the free plan! You can process 1 document per day.");
   };
 
-  const handleProPlan = async () => {
+  const handleSubscribe = async (priceId: string, planType: string) => {
     try {
       const stripe = await stripePromise;
       if (!stripe) {
         throw new Error("Stripe failed to initialize");
       }
 
-      // This is a simplified checkout - in a production app, you'd create a session on your backend
+      toast.info("Redirecting to Stripe checkout...");
+      
       const { error } = await stripe.redirectToCheckout({
         lineItems: [
           {
-            price: 'price_1QzjrxB2toh1Zq62L3xbJ8tQ', // This is a placeholder - you should replace with your actual price ID
+            price: priceId,
             quantity: 1,
           },
         ],
         mode: 'subscription',
-        successUrl: `${window.location.origin}/?success=true`,
+        successUrl: `${window.location.origin}/?success=true&plan=${planType}`,
         cancelUrl: `${window.location.origin}/?canceled=true`,
       });
 
       if (error) {
+        console.error('Stripe checkout error:', error);
         toast.error(`Payment error: ${error.message}`);
       }
     } catch (err) {
@@ -87,13 +95,13 @@ const PricingSection: React.FC = () => {
             </CardFooter>
           </Card>
           
-          {/* Pro Plan */}
+          {/* Monthly Plan */}
           <Card className="border-2 border-primary relative">
             <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-2 bg-primary text-white text-xs py-1 px-3 rounded-full font-medium">
               Popular
             </div>
             <CardHeader className="pb-8">
-              <CardTitle className="text-xl">Unlimited</CardTitle>
+              <CardTitle className="text-xl">Monthly</CardTitle>
               <CardDescription>For individuals and small teams</CardDescription>
               <div className="mt-4 flex items-baseline gap-1">
                 <span className="text-3xl font-bold">$5</span>
@@ -111,37 +119,40 @@ const PricingSection: React.FC = () => {
               </ul>
             </CardContent>
             <CardFooter>
-              <Button className="w-full" onClick={handleProPlan}>
+              <Button className="w-full" onClick={() => handleSubscribe(STRIPE_PRICES.monthly, 'monthly')}>
                 <DollarSign className="mr-1 h-4 w-4" />
-                Subscribe Now
+                Subscribe Monthly
               </Button>
             </CardFooter>
           </Card>
           
-          {/* Enterprise Plan */}
+          {/* Yearly Plan */}
           <Card className="border-2 relative">
+            <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-2 bg-green-500 text-white text-xs py-1 px-3 rounded-full font-medium">
+              Save 33%
+            </div>
             <CardHeader className="pb-8">
-              <CardTitle className="text-xl">Enterprise</CardTitle>
-              <CardDescription>For larger organizations</CardDescription>
+              <CardTitle className="text-xl">Yearly</CardTitle>
+              <CardDescription>Best value for serious users</CardDescription>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-3xl font-bold">Custom</span>
+                <span className="text-3xl font-bold">$20</span>
+                <span className="text-muted-foreground">/year</span>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <ul className="space-y-2">
+                <PricingFeature>Everything in Monthly plan</PricingFeature>
                 <PricingFeature>Unlimited document processing</PricingFeature>
-                <PricingFeature>Premium course generation</PricingFeature>
-                <PricingFeature>Custom FAQ generation</PricingFeature>
-                <PricingFeature>SCORM compliant exports</PricingFeature>
-                <PricingFeature>Team library & collaboration</PricingFeature>
-                <PricingFeature>API access</PricingFeature>
-                <PricingFeature>Dedicated support</PricingFeature>
-                <PricingFeature>Custom integrations</PricingFeature>
+                <PricingFeature>Premium support</PricingFeature>
+                <PricingFeature>Early access to new features</PricingFeature>
+                <PricingFeature>Advanced analytics</PricingFeature>
               </ul>
             </CardContent>
             <CardFooter>
-              <Button variant="outline" className="w-full" onClick={handleEnterprisePlan}>
-                Contact Sales
+              <Button variant="outline" className="w-full bg-green-50 hover:bg-green-100 border-green-200" 
+                onClick={() => handleSubscribe(STRIPE_PRICES.yearly, 'yearly')}>
+                <DollarSign className="mr-1 h-4 w-4" />
+                Subscribe Yearly
               </Button>
             </CardFooter>
           </Card>
