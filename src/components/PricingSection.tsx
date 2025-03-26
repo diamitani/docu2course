@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,7 @@ const stripePromise = loadStripe('pk_live_51QzjjzB2toh1Zq62emo5ayCdY1v9WF5N66qaJ
 
 // Stripe price IDs for the different plans
 const STRIPE_PRICES = {
-  monthly: 'price_1SGUo4B2toh1Zq62eHFPEgjc',  // $5/month 
+  monthly: 'price_1SGUo4B2toh1Zq62eHFPEgjc',  // $5/month - product: prod_S0kUtHpTN8fOoA
   yearly: 'price_1SGUp2B2toh1Zq62zChcEWI4'    // $20/year
 };
 
