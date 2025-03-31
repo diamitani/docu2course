@@ -1,164 +1,85 @@
 
-import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState } from 'react';
 import Layout from '@/components/Layout';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
+import Upload from '@/components/Upload';
+import ApiKeyManagement from '@/components/ApiKeyManagement';
 import { useAuth } from '@/contexts/AuthContext';
-import { getUserCourses, deleteCourse } from '@/utils/db/dynamoDBService';
-import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Upload as UploadIcon, Settings, FileText } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-interface CourseItem {
-  user_id: string;
-  id: string;
-  title: string;
-  description?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-const Dashboard: React.FC = () => {
-  const [courses, setCourses] = useState<CourseItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { user, signOut } = useAuth();
+const Dashboard = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<string>("upload");
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-
-    fetchUserCourses();
-  }, [user, navigate]);
-
-  const fetchUserCourses = async () => {
-    if (!user) return;
-    
-    try {
-      const userCourses = await getUserCourses(user.username);
-      setCourses(userCourses);
-    } catch (error) {
-      console.error('Error fetching courses:', error);
-      toast.error('Failed to load your courses');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDeleteCourse = async (courseId: string) => {
-    if (!user) return;
-    
-    try {
-      await deleteCourse(user.username, courseId);
-      toast.success('Course deleted successfully');
-      setCourses(prevCourses => prevCourses.filter(course => course.id !== courseId));
-    } catch (error) {
-      console.error('Error deleting course:', error);
-      toast.error('Failed to delete course');
-    }
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      navigate('/');
-      toast.success('Successfully logged out');
-    } catch (error) {
-      console.error('Error signing out:', error);
-      toast.error('Failed to sign out');
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    });
-  };
+  if (!user) {
+    return (
+      <Layout>
+        <div className="container max-w-4xl mx-auto py-16 px-4">
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <h2 className="text-2xl font-bold mb-4">Please Log In</h2>
+              <p className="text-gray-500 mb-6">You need to be logged in to access the dashboard.</p>
+              <Button onClick={() => navigate('/login')}>Go to Login</Button>
+            </CardContent>
+          </Card>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
-      <div className="container py-16 px-4 space-y-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">Your Courses</h1>
-            <p className="text-muted-foreground mt-1">
-              {user ? `Welcome back, ${user.attributes.name || user.username}` : 'Loading...'}
-            </p>
-          </div>
-          <div className="flex space-x-4">
-            <Button 
-              variant="default" 
-              onClick={() => navigate('/')}
-            >
-              Create New Course
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={handleSignOut}
-            >
-              Sign Out
-            </Button>
-          </div>
-        </div>
+      <div className="container max-w-4xl mx-auto py-16 px-4">
+        <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
         
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          </div>
-        ) : courses.length === 0 ? (
-          <div className="text-center py-16">
-            <h2 className="text-2xl font-medium text-gray-700 mb-4">No courses created yet</h2>
-            <p className="text-muted-foreground mb-8">
-              Upload your first document to start creating interactive courses
-            </p>
-            <Button 
-              size="lg"
-              onClick={() => navigate('/')}
-            >
-              Upload Document
-            </Button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {courses.map((course) => (
-              <Card key={course.id} className="overflow-hidden">
-                <CardHeader>
-                  <CardTitle>{course.title}</CardTitle>
-                  <CardDescription>
-                    Created on {formatDate(course.created_at)}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600 line-clamp-3">
-                    {course.description || 'No description available'}
-                  </p>
-                </CardContent>
-                <CardFooter className="flex justify-between">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleDeleteCourse(course.id)}
-                  >
-                    Delete
-                  </Button>
-                  <Button 
-                    variant="default" 
-                    size="sm"
-                    asChild
-                  >
-                    <Link to={`/course/${course.id}`}>
-                      View Course
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        )}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-3 mb-8">
+            <TabsTrigger value="upload" className="flex items-center gap-2">
+              <UploadIcon className="h-4 w-4" />
+              <span>Upload Document</span>
+            </TabsTrigger>
+            <TabsTrigger value="documents" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              <span>My Documents</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              <span>Settings</span>
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="upload">
+            <Card>
+              <CardContent className="pt-6">
+                <Upload />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="documents">
+            <Card>
+              <CardContent className="py-6">
+                <h2 className="text-xl font-semibold mb-4">Your Documents</h2>
+                <p className="text-gray-500">
+                  You don't have any processed documents yet. Upload a document to get started.
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="settings">
+            <ApiKeyManagement 
+              onApiKeySet={(data) => {
+                console.log('API key set:', data);
+                // Additional logic if needed
+              }}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );
