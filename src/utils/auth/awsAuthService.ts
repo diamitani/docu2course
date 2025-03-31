@@ -1,14 +1,12 @@
 
 import { Amplify } from 'aws-amplify';
-import { signIn as amplifySignIn, signUp as amplifySignUp, confirmSignUp as amplifyConfirmSignUp, signOut as amplifySignOut, fetchUserAttributes, getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
+import { signIn as amplifySignIn, signUp as amplifySignUp, confirmSignUp as amplifyConfirmSignUp, signOut as amplifySignOut, fetchUserAttributes, getCurrentUser as getUser, fetchAuthSession } from 'aws-amplify/auth';
 import { cognitoConfig } from '@/config/aws-config';
 
 // Configure Amplify with our Cognito settings
 export const configureAuth = () => {
   Amplify.configure({
-    Auth: {
-      ...cognitoConfig
-    }
+    Auth: cognitoConfig
   });
 };
 
@@ -22,7 +20,7 @@ export const signIn = async (username: string, password: string) => {
     
     if (signInOutput.isSignedIn) {
       const userAttributes = await fetchUserAttributes();
-      const currentUser = await getCurrentUser();
+      const currentUser = await getUser();
       
       return {
         username: currentUser.username,
@@ -85,9 +83,9 @@ export const signOut = async () => {
 };
 
 // Get the current authenticated user
-export const getCurrentAuthenticatedUser = async () => {
+export const getCurrentUser = async () => {
   try {
-    const currentUser = await getCurrentUser();
+    const currentUser = await getUser();
     const userAttributes = await fetchUserAttributes();
     
     return {

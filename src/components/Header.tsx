@@ -39,24 +39,36 @@ const Header: React.FC = () => {
           </div>
           
           <nav className="hidden md:flex items-center space-x-6">
-            <button 
-              onClick={() => scrollToSection('how-it-works')}
+            <a 
+              href="#how-it-works"
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToSection('how-it-works');
+              }}
               className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
             >
               How It Works
-            </button>
-            <button 
-              onClick={() => scrollToSection('features')}
+            </a>
+            <a 
+              href="#features"
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToSection('features');
+              }}
               className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
             >
               Features
-            </button>
-            <button 
-              onClick={() => scrollToSection('pricing')}
+            </a>
+            <a 
+              href="#pricing"
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToSection('pricing');
+              }}
               className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
             >
               Pricing
-            </button>
+            </a>
             <Link to="/faq" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">
               FAQ
             </Link>

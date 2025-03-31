@@ -12,11 +12,7 @@ import {
 
 interface User {
   username: string;
-  attributes: {
-    email: string;
-    name?: string;
-    [key: string]: any;
-  };
+  attributes: Record<string, string>;
 }
 
 interface AuthContextType {
