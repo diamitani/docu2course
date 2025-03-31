@@ -1,9 +1,13 @@
 
 import React from 'react';
 
-const FeaturesGrid: React.FC = () => {
+interface FeaturesGridProps {
+  id?: string;
+}
+
+const FeaturesGrid: React.FC<FeaturesGridProps> = ({ id = "features" }) => {
   return (
-    <section id="features" className="py-20 bg-gray-50">
+    <section id={id} className="py-20 bg-gray-50">
       <div className="container px-4 md:px-6">
         <div className="text-center mb-16">
           <h2 className="text-3xl font-bold tracking-tighter mb-4">Key Features</h2>

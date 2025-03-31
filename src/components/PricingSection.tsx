@@ -5,16 +5,21 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { CheckIcon, DollarSign } from 'lucide-react';
 import { toast } from "sonner";
 
+interface PricingSectionProps {
+  id?: string;
+}
+
 // Initialize Stripe with the publishable key
 const stripePromise = loadStripe('pk_live_51QzjjzB2toh1Zq62emo5ayCdY1v9WF5N66qaJwMtfxmY1PHUbyqxMZ7qrOEvmi38BlpfNBTAsAt6OD4o0l6gPYus00zH6XXfPV');
 
 // Stripe price IDs for the different plans
+// Product ID for $5 unlimited is prod_S0kUtHpTN8fOoA
 const STRIPE_PRICES = {
   monthly: 'price_1SGUo4B2toh1Zq62eHFPEgjc',  // $5/month - product: prod_S0kUtHpTN8fOoA
   yearly: 'price_1SGUp2B2toh1Zq62zChcEWI4'    // $20/year
 };
 
-const PricingSection: React.FC = () => {
+const PricingSection: React.FC<PricingSectionProps> = ({ id = "pricing" }) => {
   const handleFreePlan = () => {
     document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth' });
     toast.success("You're using the free plan! You can process 1 document per day.");
@@ -58,7 +63,7 @@ const PricingSection: React.FC = () => {
   };
 
   return (
-    <section id="pricing" className="py-20 bg-gray-50">
+    <section id={id} className="py-20 bg-gray-50">
       <div className="container px-4 md:px-6">
         <div className="text-center mb-16">
           <h2 className="text-3xl font-bold tracking-tighter mb-4">Simple, Transparent Pricing</h2>

@@ -2,9 +2,13 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 
-const HowItWorks: React.FC = () => {
+interface HowItWorksProps {
+  id?: string;
+}
+
+const HowItWorks: React.FC<HowItWorksProps> = ({ id = "how-it-works" }) => {
   return (
-    <section id="how-it-works" className="py-20 bg-gray-50">
+    <section id={id} className="py-20 bg-gray-50">
       <div className="container px-4 md:px-6">
         <div className="text-center mb-16">
           <h2 className="text-3xl font-bold tracking-tighter mb-4">How It Works</h2>
