@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,10 +7,10 @@ import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
+  NavigationMenuLink,
 } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';
 
@@ -167,6 +166,17 @@ const Header: React.FC = () => {
                   My Courses
                 </Link>
                 <Link 
+                  to="/projects" 
+                  className={cn(
+                    "text-sm font-medium transition-colors",
+                    isActive('/projects') 
+                      ? "text-primary font-semibold" 
+                      : "text-gray-700 hover:text-primary"
+                  )}
+                >
+                  My Projects
+                </Link>
+                <Link 
                   to="/dashboard/settings" 
                   className={cn(
                     "text-sm font-medium transition-colors",
@@ -204,6 +214,19 @@ const Header: React.FC = () => {
                                 <div className="text-sm font-medium">Dashboard</div>
                                 <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
                                   Manage your courses
+                                </p>
+                              </Link>
+                            </NavigationMenuLink>
+                          </li>
+                          <li>
+                            <NavigationMenuLink asChild>
+                              <Link
+                                to="/projects"
+                                className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                              >
+                                <div className="text-sm font-medium">Projects</div>
+                                <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                                  Manage your projects
                                 </p>
                               </Link>
                             </NavigationMenuLink>
@@ -339,6 +362,18 @@ const Header: React.FC = () => {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   My Courses
+                </Link>
+                <Link 
+                  to="/projects" 
+                  className={cn(
+                    "text-sm font-medium py-2 px-3 rounded-md transition-colors",
+                    isActive('/projects') 
+                      ? "bg-primary/10 text-primary font-semibold" 
+                      : "text-gray-700 hover:bg-gray-100"
+                  )}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  My Projects
                 </Link>
                 <Link 
                   to="/dashboard/settings" 
