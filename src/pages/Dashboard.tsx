@@ -9,11 +9,20 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Upload as UploadIcon, Settings, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>("upload");
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+
+  const handleFileUploaded = (file: File) => {
+    setUploadedFile(file);
+    console.log('File uploaded:', file.name, file.size);
+    toast.success(`File "${file.name}" ready for processing`);
+    // Here you would typically upload to storage or process the file
+  };
 
   if (!user) {
     return (
@@ -55,7 +64,7 @@ const Dashboard = () => {
           <TabsContent value="upload">
             <Card>
               <CardContent className="pt-6">
-                <Upload />
+                <Upload onFileUploaded={handleFileUploaded} />
               </CardContent>
             </Card>
           </TabsContent>
@@ -64,9 +73,16 @@ const Dashboard = () => {
             <Card>
               <CardContent className="py-6">
                 <h2 className="text-xl font-semibold mb-4">Your Documents</h2>
-                <p className="text-gray-500">
-                  You don't have any processed documents yet. Upload a document to get started.
-                </p>
+                {uploadedFile ? (
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-md">
+                    <p className="font-medium">{uploadedFile.name}</p>
+                    <p className="text-sm text-gray-500">{(uploadedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                  </div>
+                ) : (
+                  <p className="text-gray-500">
+                    You don't have any processed documents yet. Upload a document to get started.
+                  </p>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

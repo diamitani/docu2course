@@ -12,6 +12,7 @@ import FAQ from "./pages/FAQ";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import UserDashboard from "./pages/UserDashboard";
 import Projects from "./pages/Projects";
 import Subscription from "./pages/Subscription";
 import PaymentSuccess from "./pages/PaymentSuccess";
@@ -42,6 +43,15 @@ const App = () => (
               element={
                 <AuthMiddleware>
                   <Dashboard />
+                </AuthMiddleware>
+              } 
+            />
+            
+            <Route 
+              path="/user-dashboard" 
+              element={
+                <AuthMiddleware>
+                  <UserDashboard />
                 </AuthMiddleware>
               } 
             />

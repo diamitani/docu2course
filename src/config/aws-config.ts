@@ -13,6 +13,7 @@ export const cognitoConfig = {
 export const dynamoDBConfig = {
   region: 'us-east-1', // Adjust region as needed
   credentials: {
+    // Warning: Secret keys should not be hardcoded in client-side code in production
     accessKeyId: 'AKIAWPPO6AGOBPQUFOXS',
     secretAccessKey: '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',
   },

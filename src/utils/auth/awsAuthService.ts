@@ -8,7 +8,12 @@ export const configureAuth = () => {
   // The Auth config needs to be passed directly to match expected AuthConfig type
   Amplify.configure({
     Auth: {
-      Cognito: cognitoConfig
+      Cognito: {
+        region: cognitoConfig.region,
+        userPoolId: cognitoConfig.userPoolId,
+        userPoolClientId: cognitoConfig.userPoolWebClientId,  // Correct key name for Amplify v6
+        authenticationFlowType: cognitoConfig.authenticationFlowType
+      }
     }
   });
 };

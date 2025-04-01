@@ -36,7 +36,10 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
     setIsLoading(true);
     
     try {
-      await signUp(username, password, email, name);
+      await signUp(username, password, {
+        email,
+        name
+      });
       toast.success('Account created! Please check your email for confirmation code');
       onSuccess(username);
     } catch (error: any) {
