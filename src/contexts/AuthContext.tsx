@@ -1,27 +1,20 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { 
-  configureAuth, 
-  getCurrentUser, 
-  signIn, 
-  signUp, 
-  signOut, 
-  confirmSignUp, 
-  isAuthenticated 
-} from '@/utils/auth/awsAuthService';
+import { supabase } from '@/integrations/supabase/client';
+import { Session, User } from '@supabase/supabase-js';
 
-interface User {
+interface AuthUser {
   username: string;
   attributes: Record<string, string>;
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
   loading: boolean;
   error: string | null;
-  signIn: (username: string, password: string) => Promise<void>;
-  signUp: (username: string, password: string, email: string, name: string) => Promise<void>;
-  confirmSignUp: (username: string, code: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, name: string) => Promise<void>;
+  confirmSignUp: (email: string, code: string) => Promise<void>;
   signOut: () => Promise<void>;
   isAuthenticated: () => Promise<boolean>;
 }
@@ -29,41 +22,68 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    configureAuth();
-    checkCurrentUser();
-  }, []);
+    // Set up auth state listener first
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        setSession(currentSession);
+        
+        if (currentSession?.user) {
+          const { id, email, user_metadata } = currentSession.user;
+          setUser({
+            username: email || id,
+            attributes: {
+              ...user_metadata,
+              email: email || '',
+              name: user_metadata?.name || email || id,
+            },
+          });
+        } else {
+          setUser(null);
+        }
+      }
+    );
 
-  const checkCurrentUser = async () => {
-    try {
-      const currentUser = await getCurrentUser();
-      if (currentUser) {
+    // Then check for existing session
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+      
+      if (currentSession?.user) {
+        const { id, email, user_metadata } = currentSession.user;
         setUser({
-          username: currentUser.username,
-          attributes: currentUser.attributes,
+          username: email || id,
+          attributes: {
+            ...user_metadata,
+            email: email || '',
+            name: user_metadata?.name || email || id,
+          },
         });
       }
-    } catch (err) {
-      console.error('Error checking current user:', err);
-    } finally {
+      
       setLoading(false);
-    }
-  };
+    });
 
-  const handleSignIn = async (username: string, password: string) => {
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleSignIn = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
     
     try {
-      const userData = await signIn(username, password);
-      setUser({
-        username: userData.username,
-        attributes: userData.attributes,
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
+      
+      if (error) throw error;
     } catch (err: any) {
       setError(err.message || 'An error occurred during sign in');
       throw err;
@@ -72,12 +92,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const handleSignUp = async (username: string, password: string, email: string, name: string) => {
+  const handleSignUp = async (email: string, password: string, name: string) => {
     setLoading(true);
     setError(null);
     
     try {
-      await signUp(username, password, email, name);
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name
+          }
+        }
+      });
+      
+      if (error) throw error;
     } catch (err: any) {
       setError(err.message || 'An error occurred during sign up');
       throw err;
@@ -86,12 +116,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const handleConfirmSignUp = async (username: string, code: string) => {
+  const handleConfirmSignUp = async (email: string, code: string) => {
     setLoading(true);
     setError(null);
     
     try {
-      await confirmSignUp(username, code);
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: code,
+        type: 'signup'
+      });
+      
+      if (error) throw error;
     } catch (err: any) {
       setError(err.message || 'An error occurred during confirmation');
       throw err;
@@ -105,8 +141,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
     
     try {
-      await signOut();
-      setUser(null);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
     } catch (err: any) {
       setError(err.message || 'An error occurred during sign out');
       throw err;
@@ -116,7 +152,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const handleIsAuthenticated = async () => {
-    return await isAuthenticated();
+    const { data } = await supabase.auth.getSession();
+    return !!data.session;
   };
 
   const value = {

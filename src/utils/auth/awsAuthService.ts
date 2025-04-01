@@ -1,3 +1,4 @@
+
 import { Amplify } from 'aws-amplify';
 import { signIn as amplifySignIn, signUp as amplifySignUp, confirmSignUp as amplifyConfirmSignUp, signOut as amplifySignOut, fetchUserAttributes, getCurrentUser as getUser, fetchAuthSession } from 'aws-amplify/auth';
 import { cognitoConfig } from '@/config/aws-config';
@@ -6,7 +7,9 @@ import { cognitoConfig } from '@/config/aws-config';
 export const configureAuth = () => {
   // The Auth config needs to be passed directly to match expected AuthConfig type
   Amplify.configure({
-    Auth: cognitoConfig
+    Auth: {
+      Cognito: cognitoConfig
+    }
   });
 };
 
