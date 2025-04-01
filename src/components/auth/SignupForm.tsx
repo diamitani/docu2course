@@ -1,8 +1,8 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 interface SignupFormProps {
@@ -12,35 +12,26 @@ interface SignupFormProps {
 const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { signUp } = useAuth();
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!username || !email || !password) {
+    if (!username || !email) {
       toast.error('Please fill out all required fields');
-      return;
-    }
-    
-    if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
       return;
     }
     
     setIsLoading(true);
     
     try {
-      // Fixed: Using the correct object format for signUp
-      await signUp(email, password, username, name);
-      toast.success('Account created! Please check your email for confirmation code');
-      onSuccess(username);
+      // For demo purposes, just simulate signup
+      setTimeout(() => {
+        toast.success('Account created! This is a demo - no actual account was created.');
+        onSuccess(username);
+      }, 1000);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to create account. Please try again.');
+      toast.error('This is a demo - no actual signup functionality is implemented.');
     } finally {
       setIsLoading(false);
     }
@@ -72,44 +63,13 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
         />
       </div>
       
-      <div className="space-y-2">
-        <Label htmlFor="name">Full Name</Label>
-        <Input
-          id="name"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Enter your full name"
-        />
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="password">Password*</Label>
-        <Input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Create a password"
-          required
-        />
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="confirmPassword">Confirm Password*</Label>
-        <Input
-          id="confirmPassword"
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Confirm your password"
-          required
-        />
-      </div>
-      
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? 'Creating Account...' : 'Sign Up'}
+        {isLoading ? 'Creating Demo Account...' : 'Demo Sign Up'}
       </Button>
+      
+      <p className="text-sm text-center text-muted-foreground">
+        This is a portfolio demo. No actual account will be created.
+      </p>
     </form>
   );
 };

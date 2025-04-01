@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 interface ConfirmSignupFormProps {
@@ -15,7 +14,6 @@ const ConfirmSignupForm: React.FC<ConfirmSignupFormProps> = ({ username }) => {
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { confirmSignUp } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,11 +27,13 @@ const ConfirmSignupForm: React.FC<ConfirmSignupFormProps> = ({ username }) => {
     setIsLoading(true);
     
     try {
-      await confirmSignUp(username, code);
-      toast.success('Account confirmed! You can now log in');
-      navigate('/login');
+      // For demo purposes, just simulate confirmation
+      setTimeout(() => {
+        toast.success('Demo account confirmed!');
+        navigate('/');
+      }, 1000);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to confirm account. Please try again.');
+      toast.error('This is a demo - no actual confirmation functionality is implemented.');
     } finally {
       setIsLoading(false);
     }
@@ -54,8 +54,12 @@ const ConfirmSignupForm: React.FC<ConfirmSignupFormProps> = ({ username }) => {
       </div>
       
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? 'Confirming...' : 'Confirm Account'}
+        {isLoading ? 'Confirming...' : 'Confirm Demo Account'}
       </Button>
+      
+      <p className="text-sm text-center text-muted-foreground">
+        This is a portfolio demo. No actual confirmation will occur.
+      </p>
     </form>
   );
 };

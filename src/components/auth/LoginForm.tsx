@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 const LoginForm: React.FC = () => {
@@ -12,7 +11,6 @@ const LoginForm: React.FC = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { signIn } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,11 +24,13 @@ const LoginForm: React.FC = () => {
     setIsLoading(true);
     
     try {
-      await signIn(username, password);
-      toast.success('Successfully logged in!');
-      navigate('/dashboard');
+      // For demo purposes, just simulate login
+      setTimeout(() => {
+        toast.success('Demo login successful!');
+        navigate('/');
+      }, 1000);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to log in. Please try again.');
+      toast.error('This is a demo - no actual login functionality is implemented.');
     } finally {
       setIsLoading(false);
     }
@@ -63,8 +63,12 @@ const LoginForm: React.FC = () => {
       </div>
       
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? 'Logging in...' : 'Log In'}
+        {isLoading ? 'Logging in...' : 'Demo Log In'}
       </Button>
+      
+      <p className="text-sm text-center text-muted-foreground">
+        This is a portfolio demo. No actual login will occur.
+      </p>
     </form>
   );
 };
