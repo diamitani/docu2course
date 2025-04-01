@@ -35,7 +35,7 @@ const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({
 
       if (requirePro) {
         try {
-          // Fixed: Using a direct query to profiles instead of an invalid relation
+          // Fixed: Using a direct query to the profiles table
           const { data: profile, error } = await supabase
             .from('profiles')
             .select('is_pro')
@@ -44,7 +44,7 @@ const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({
           
           if (error) throw error;
           
-          if (!profile?.is_pro) {
+          if (!profile || !profile.is_pro) {
             setIsProUser(false);
             navigate('/subscription', { 
               state: { 

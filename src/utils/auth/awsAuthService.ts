@@ -11,8 +11,8 @@ export const configureAuth = () => {
       Cognito: {
         userPoolId: cognitoConfig.userPoolId,
         userPoolClientId: cognitoConfig.userPoolWebClientId,
-        region: cognitoConfig.region,
-        authenticationFlowType: cognitoConfig.authenticationFlowType
+        authenticationFlowType: cognitoConfig.authenticationFlowType,
+        region: cognitoConfig.region
       }
     }
   });
