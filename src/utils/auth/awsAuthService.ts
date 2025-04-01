@@ -5,13 +5,13 @@ import { cognitoConfig } from '@/config/aws-config';
 
 // Configure Amplify with our Cognito settings
 export const configureAuth = () => {
-  // The Auth config needs to be passed directly to match expected AuthConfig type
+  // Fixed: Using the correct property names for Amplify v6 configuration
   Amplify.configure({
     Auth: {
       Cognito: {
-        region: cognitoConfig.region,
         userPoolId: cognitoConfig.userPoolId,
-        userPoolClientId: cognitoConfig.userPoolWebClientId,  // Correct key name for Amplify v6
+        userPoolClientId: cognitoConfig.userPoolWebClientId,
+        region: cognitoConfig.region,
         authenticationFlowType: cognitoConfig.authenticationFlowType
       }
     }

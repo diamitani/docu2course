@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,10 +35,8 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
     setIsLoading(true);
     
     try {
-      await signUp(username, password, {
-        email,
-        name
-      });
+      // Fixed: Using the correct object format for signUp
+      await signUp(email, password, username, name);
       toast.success('Account created! Please check your email for confirmation code');
       onSuccess(username);
     } catch (error: any) {
