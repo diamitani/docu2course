@@ -46,13 +46,6 @@ export const signUp = async (email: string, password: string) => {
   return data.user;
 };
 
-// Confirm sign up with code
-export const confirmSignUp = async (email: string, token: string) => {
-  // Supabase handles email confirmation differently, this is a stub
-  // This would be used if we were manually handling token verification
-  return null;
-};
-
 // Sign out
 export const signOut = async () => {
   const { error } = await supabase.auth.signOut();
@@ -61,5 +54,12 @@ export const signOut = async () => {
     throw error;
   }
   
+  return null;
+};
+
+// Confirm sign up with code
+export const confirmSignUp = async (email: string, token: string) => {
+  // Supabase handles email confirmation differently, this is a stub
+  // This would be used if we were manually handling token verification
   return null;
 };
