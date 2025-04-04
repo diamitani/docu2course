@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from "sonner";
@@ -7,6 +6,7 @@ interface UploadProps {
   onFileUploaded: (file: File) => void;
 }
 
+// Using default export for Upload component
 const Upload: React.FC<UploadProps> = ({ onFileUploaded }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);

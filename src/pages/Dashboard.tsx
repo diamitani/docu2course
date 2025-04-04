@@ -1,12 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { UploadCloud, File, Trash, Edit, BookOpen } from 'lucide-react';
+import { Eye, Trash2, File, Upload as UploadIcon, Clock } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { Link } from 'react-router-dom';
-import { UploadComponent } from '@/components/Upload';
+import Upload from '@/components/Upload';  // Using default import for the Upload component
 import { formatDistanceToNow } from 'date-fns';
 
 // Types for course history data
@@ -118,7 +117,7 @@ const Dashboard: React.FC = () => {
           
           {/* Upload button for new documents */}
           <div className="mt-4 md:mt-0">
-            <UploadComponent onFileUploaded={handleFileUploaded} />
+            <Upload onFileUploaded={handleFileUploaded} />
           </div>
         </div>
 
@@ -131,7 +130,7 @@ const Dashboard: React.FC = () => {
               Upload your first document to get started with AI-generated courses.
             </p>
             <div className="mt-6">
-              <UploadComponent onFileUploaded={handleFileUploaded} />
+              <Upload onFileUploaded={handleFileUploaded} />
             </div>
           </div>
         )}
