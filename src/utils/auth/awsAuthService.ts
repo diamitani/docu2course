@@ -12,8 +12,7 @@ export const configureAuth = () => {
         userPoolClientId: cognitoConfig.userPoolWebClientId,
         signUpVerificationMethod: 'code'
       }
-    },
-    region: cognitoConfig.region
+    }
   });
 };
 

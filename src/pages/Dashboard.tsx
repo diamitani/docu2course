@@ -1,296 +1,181 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Layout from '@/components/Layout';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
-import { Eye, Trash2, File, Upload, Clock } from 'lucide-react';
-import { format } from 'date-fns';
-import { getSavedCourses, deleteSavedCourse } from '@/utils/processingUtils';
-import Upload from '@/components/Upload';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { processDocument, generateCourseFromPrompt } from '@/utils/processingUtils';
-import ProcessingVisual from '@/components/ProcessingVisual';
 
-const Dashboard = () => {
-  const navigate = useNavigate();
-  const [savedCourses, setSavedCourses] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<string>("history");
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [currentFile, setCurrentFile] = useState<File | null>(null);
-  const [promptInput, setPromptInput] = useState('');
-  const [promptTitle, setPromptTitle] = useState('');
-  
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
+import { UploadCloud, File, Trash, Edit, BookOpen } from 'lucide-react';
+import Layout from '@/components/Layout';
+import { Link } from 'react-router-dom';
+import { UploadComponent } from '@/components/Upload';
+import { formatDistanceToNow } from 'date-fns';
+
+// Types for course history data
+interface CourseHistoryItem {
+  id: string;
+  title: string;
+  createdAt: string;
+  description?: string;
+  content?: any;
+}
+
+const Dashboard: React.FC = () => {
+  const [courseHistory, setCourseHistory] = useState<CourseHistoryItem[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Load course history from localStorage on component mount
   useEffect(() => {
-    // Load saved courses
-    const courses = getSavedCourses();
-    setSavedCourses(courses);
-  }, []);
-  
-  const handleFileUploaded = (file: File) => {
-    setCurrentFile(file);
-  };
-  
-  const handleDeleteCourse = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this course?')) {
-      const success = deleteSavedCourse(id);
-      if (success) {
-        // Update the list
-        setSavedCourses(getSavedCourses());
-        toast.success('Course deleted');
-      } else {
-        toast.error('Failed to delete course');
+    try {
+      const storedHistory = localStorage.getItem('courseHistory');
+      if (storedHistory) {
+        setCourseHistory(JSON.parse(storedHistory));
       }
+    } catch (error) {
+      console.error('Error loading course history:', error);
+      toast.error('Failed to load your course history');
     }
-  };
-  
-  const handleProcessDocument = async () => {
-    if (!currentFile) {
-      toast.error("Please upload a document first");
-      return;
-    }
-    
-    setIsProcessing(true);
-    setProgress(0);
-    
-    // Import the simulation function dynamically to keep this component clean
-    const { simulateProgress } = await import('@/utils/processingUtils');
-    const stopProgress = simulateProgress(setProgress);
+  }, []);
+
+  // Handle file upload and processing
+  const handleFileUploaded = async (file: File) => {
+    setIsUploading(true);
     
     try {
-      // Process the document
-      await processDocument(currentFile);
+      // Generate a unique ID for the course
+      const courseId = Date.now().toString();
       
-      // Stop progress simulation
-      stopProgress();
-      setProgress(100);
+      // Create a placeholder entry while processing
+      const newCourse: CourseHistoryItem = {
+        id: courseId,
+        title: file.name,
+        createdAt: new Date().toISOString(),
+        description: 'Processing your document...',
+      };
       
-      // Update course list and show success
-      setTimeout(() => {
-        setIsProcessing(false);
-        setSavedCourses(getSavedCourses());
-        toast.success("Document successfully processed!");
-        // Reset file selection after processing
-        setCurrentFile(null);
-        // Switch to history tab to show the new course
-        setActiveTab("history");
-      }, 500);
+      // Add to history and save to localStorage
+      const updatedHistory = [newCourse, ...courseHistory];
+      setCourseHistory(updatedHistory);
+      localStorage.setItem('courseHistory', JSON.stringify(updatedHistory));
+      
+      // Here you would normally send the file to your API for processing
+      // For demonstration, we'll simulate processing with a timeout
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Update the course with processed data
+      const processedCourse: CourseHistoryItem = {
+        id: courseId,
+        title: file.name.replace(/\.\w+$/, ''),
+        createdAt: new Date().toISOString(),
+        description: 'An AI-generated course based on your document.',
+        content: {
+          // This would normally be the processed content from your API
+          modules: [
+            { title: 'Introduction', lessons: [{ title: 'Getting Started' }] },
+            { title: 'Core Concepts', lessons: [{ title: 'Fundamental Principles' }] }
+          ]
+        }
+      };
+      
+      // Update the history with the processed course
+      const finalHistory = courseHistory.map(course => 
+        course.id === courseId ? processedCourse : course
+      );
+      
+      setCourseHistory(finalHistory);
+      localStorage.setItem('courseHistory', JSON.stringify(finalHistory));
+      
+      toast.success('Document processed successfully!');
     } catch (error) {
       console.error('Error processing document:', error);
-      setIsProcessing(false);
-      stopProgress();
-      setProgress(0);
-      toast.error(`Failed to process document: ${error instanceof Error ? error.message : "Unknown error"}`);
+      toast.error('Failed to process your document. Please try again.');
+    } finally {
+      setIsUploading(false);
     }
   };
-  
-  const handleGenerateFromPrompt = async () => {
-    if (!promptInput.trim()) {
-      toast.error("Please enter a prompt for course generation");
-      return;
-    }
-    
-    setIsProcessing(true);
-    setProgress(0);
-    
-    // Import the simulation function dynamically
-    const { simulateProgress } = await import('@/utils/processingUtils');
-    const stopProgress = simulateProgress(setProgress);
-    
+
+  // Handle course deletion
+  const handleDeleteCourse = (id: string) => {
     try {
-      // Generate course from prompt
-      await generateCourseFromPrompt(promptTitle.trim() || "Custom Course", promptInput);
-      
-      // Stop progress simulation
-      stopProgress();
-      setProgress(100);
-      
-      // Update course list and show success
-      setTimeout(() => {
-        setIsProcessing(false);
-        setSavedCourses(getSavedCourses());
-        toast.success("Course successfully generated!");
-        // Reset prompt after processing
-        setPromptInput('');
-        setPromptTitle('');
-        // Switch to history tab to show the new course
-        setActiveTab("history");
-      }, 500);
+      const updatedHistory = courseHistory.filter(course => course.id !== id);
+      setCourseHistory(updatedHistory);
+      localStorage.setItem('courseHistory', JSON.stringify(updatedHistory));
+      toast.success('Course deleted successfully');
     } catch (error) {
-      console.error('Error generating course from prompt:', error);
-      setIsProcessing(false);
-      stopProgress();
-      setProgress(0);
-      toast.error(`Failed to generate course: ${error instanceof Error ? error.message : "Unknown error"}`);
+      console.error('Error deleting course:', error);
+      toast.error('Failed to delete the course');
     }
   };
-  
-  const viewCourse = (courseId: string) => {
-    // Instead of navigating, we'll create a URL parameter to pass to the home page
-    // This will trigger the display of a specific course
-    navigate(`/?courseId=${courseId}`);
-  };
-  
+
   return (
     <Layout>
-      <div className="container max-w-6xl mx-auto py-24 px-4">
-        <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-2 mb-8">
-            <TabsTrigger value="history">Course History</TabsTrigger>
-            <TabsTrigger value="create">Create Course</TabsTrigger>
-          </TabsList>
+      <div className="container mx-auto py-8 px-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold">Your Courses</h1>
+            <p className="text-gray-500 mt-2">
+              Upload documents to create AI-generated courses
+            </p>
+          </div>
           
-          <TabsContent value="history">
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Generated Courses</CardTitle>
-                <CardDescription>
-                  View and manage courses you've created
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {savedCourses.length === 0 ? (
-                  <div className="text-center py-12 bg-gray-50 rounded-lg">
-                    <File className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-lg font-medium text-gray-900">No courses yet</h3>
-                    <p className="mt-1 text-sm text-gray-500">
-                      Create your first course by uploading a document or generating from a prompt.
-                    </p>
-                    <Button 
-                      className="mt-4" 
-                      onClick={() => setActiveTab("create")}
-                    >
-                      <Upload className="mr-2 h-4 w-4" />
-                      Create Course
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {savedCourses.map((course) => (
-                      <Card key={course.id} className="overflow-hidden">
-                        <CardHeader className="pb-4">
-                          <CardTitle className="text-lg truncate">{course.course.title}</CardTitle>
-                          <CardDescription className="flex items-center text-xs">
-                            <Clock className="h-3 w-3 mr-1" />
-                            {format(new Date(course.timestamp), 'MMM d, yyyy')}
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="pb-4">
-                          <p className="text-sm line-clamp-3 text-gray-600">
-                            {course.course.description || 'No description available'}
-                          </p>
-                          <div className="mt-2 flex items-center text-xs text-gray-500">
-                            <File className="h-3 w-3 mr-1" />
-                            {course.fileName} ({Math.round(course.fileSize / 1024)} KB)
-                          </div>
-                          <div className="mt-1 text-xs text-gray-500">
-                            {course.course.modules.length} modules
-                          </div>
-                        </CardContent>
-                        <CardFooter className="pt-0 flex justify-between">
-                          <Button 
-                            size="sm" 
-                            variant="secondary"
-                            onClick={() => viewCourse(course.id)}
-                          >
-                            <Eye className="mr-1 h-4 w-4" />
-                            View
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            onClick={() => handleDeleteCourse(course.id)}
-                          >
-                            <Trash2 className="mr-1 h-4 w-4" />
-                            Delete
-                          </Button>
-                        </CardFooter>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="create">
-            <Card>
-              <CardHeader>
-                <CardTitle>Create New Course</CardTitle>
-                <CardDescription>
-                  Upload a document or generate from a prompt
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="upload" className="mt-6">
-                  <TabsList className="grid w-full grid-cols-2 mb-6">
-                    <TabsTrigger value="upload">Upload Document</TabsTrigger>
-                    <TabsTrigger value="prompt">Create with Prompt</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="upload">
-                    <Upload onFileUploaded={handleFileUploaded} />
-                    
-                    {currentFile && !isProcessing && (
-                      <div className="mt-8 text-center">
-                        <Button size="lg" onClick={handleProcessDocument}>
-                          Process Document
-                        </Button>
-                      </div>
-                    )}
-                  </TabsContent>
-                  
-                  <TabsContent value="prompt">
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="prompt-title">Course Title (Optional)</Label>
-                        <Input
-                          id="prompt-title"
-                          placeholder="Enter a title for your course"
-                          value={promptTitle}
-                          onChange={(e) => setPromptTitle(e.target.value)}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="prompt-input">Your Prompt</Label>
-                        <Textarea
-                          id="prompt-input"
-                          placeholder="Describe the course you want to create in detail. For example: Create a comprehensive course on machine learning fundamentals for beginners..."
-                          value={promptInput}
-                          onChange={(e) => setPromptInput(e.target.value)}
-                          className="min-h-[150px] mt-1"
-                        />
-                      </div>
-                      
-                      {!isProcessing && (
-                        <div className="text-center mt-4">
-                          <Button size="lg" onClick={handleGenerateFromPrompt}>
-                            Generate Course
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-        
-        {/* Processing Visual */}
-        {isProcessing && (
-          <div className="mt-8">
-            <ProcessingVisual isProcessing={isProcessing} progress={progress} />
+          {/* Upload button for new documents */}
+          <div className="mt-4 md:mt-0">
+            <UploadComponent onFileUploaded={handleFileUploaded} />
+          </div>
+        </div>
+
+        {/* Display when no courses are available */}
+        {courseHistory.length === 0 && !isUploading && (
+          <div className="text-center py-16 bg-gray-50 rounded-lg">
+            <UploadCloud className="w-16 h-16 mx-auto text-gray-400" />
+            <h2 className="mt-4 text-xl font-medium">No courses yet</h2>
+            <p className="mt-2 text-gray-500 max-w-md mx-auto">
+              Upload your first document to get started with AI-generated courses.
+            </p>
+            <div className="mt-6">
+              <UploadComponent onFileUploaded={handleFileUploaded} />
+            </div>
           </div>
         )}
+
+        {/* Course list */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+          {courseHistory.map((course) => (
+            <Card key={course.id} className="overflow-hidden hover:shadow-md transition-shadow">
+              <CardHeader className="pb-2">
+                <CardTitle className="line-clamp-1 text-lg">{course.title}</CardTitle>
+                <CardDescription>
+                  Created {formatDistanceToNow(new Date(course.createdAt), { addSuffix: true })}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-500 line-clamp-2">
+                  {course.description || 'No description available.'}
+                </p>
+              </CardContent>
+              <CardFooter className="flex justify-between pt-2 border-t">
+                <Link to={`/courses/${course.id}`}>
+                  <Button variant="outline" size="sm">
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    View
+                  </Button>
+                </Link>
+                <div className="flex space-x-2">
+                  <Button variant="outline" size="sm">
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleDeleteCourse(course.id)}
+                  >
+                    <Trash className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+                </div>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
       </div>
     </Layout>
   );
