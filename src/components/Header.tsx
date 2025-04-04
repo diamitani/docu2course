@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -82,113 +83,71 @@ const Header: React.FC = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            {!user ? (
-              <>
-                <a 
-                  href="#how-it-works"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection('how-it-works');
-                  }}
-                  className={cn(
-                    "text-sm font-medium transition-colors",
-                    isActive('#how-it-works') 
-                      ? "text-primary font-semibold" 
-                      : "text-gray-700 hover:text-primary"
-                  )}
-                >
-                  How It Works
-                </a>
-                <a 
-                  href="#features"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection('features');
-                  }}
-                  className={cn(
-                    "text-sm font-medium transition-colors",
-                    isActive('#features') 
-                      ? "text-primary font-semibold" 
-                      : "text-gray-700 hover:text-primary"
-                  )}
-                >
-                  Features
-                </a>
-                <a 
-                  href="#pricing"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection('pricing');
-                  }}
-                  className={cn(
-                    "text-sm font-medium transition-colors",
-                    isActive('#pricing') 
-                      ? "text-primary font-semibold" 
-                      : "text-gray-700 hover:text-primary"
-                  )}
-                >
-                  Pricing
-                </a>
-                <Link 
-                  to="/faq" 
-                  className={cn(
-                    "text-sm font-medium transition-colors",
-                    isActive('/faq') 
-                      ? "text-primary font-semibold" 
-                      : "text-gray-700 hover:text-primary"
-                  )}
-                >
-                  FAQ
-                </Link>
-                <Link 
-                  to="/rag-framework" 
-                  className={cn(
-                    "text-sm font-medium transition-colors",
-                    isActive('/rag-framework') 
-                      ? "text-primary font-semibold" 
-                      : "text-gray-700 hover:text-primary"
-                  )}
-                >
-                  RAG Framework
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link 
-                  to="/dashboard" 
-                  className={cn(
-                    "text-sm font-medium transition-colors",
-                    isActive('/dashboard') 
-                      ? "text-primary font-semibold" 
-                      : "text-gray-700 hover:text-primary"
-                  )}
-                >
-                  My Courses
-                </Link>
-                <Link 
-                  to="/projects" 
-                  className={cn(
-                    "text-sm font-medium transition-colors",
-                    isActive('/projects') 
-                      ? "text-primary font-semibold" 
-                      : "text-gray-700 hover:text-primary"
-                  )}
-                >
-                  My Projects
-                </Link>
-                <Link 
-                  to="/dashboard/settings" 
-                  className={cn(
-                    "text-sm font-medium transition-colors",
-                    isActive('/dashboard/settings') 
-                      ? "text-primary font-semibold" 
-                      : "text-gray-700 hover:text-primary"
-                  )}
-                >
-                  Settings
-                </Link>
-              </>
-            )}
+            <>
+              <a 
+                href="#how-it-works"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToSection('how-it-works');
+                }}
+                className={cn(
+                  "text-sm font-medium transition-colors",
+                  isActive('#how-it-works') 
+                    ? "text-primary font-semibold" 
+                    : "text-gray-700 hover:text-primary"
+                )}
+              >
+                How It Works
+              </a>
+              <a 
+                href="#features"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToSection('features');
+                }}
+                className={cn(
+                  "text-sm font-medium transition-colors",
+                  isActive('#features') 
+                    ? "text-primary font-semibold" 
+                    : "text-gray-700 hover:text-primary"
+                )}
+              >
+                Features
+              </a>
+              <Link 
+                to="/faq" 
+                className={cn(
+                  "text-sm font-medium transition-colors",
+                  isActive('/faq') 
+                    ? "text-primary font-semibold" 
+                    : "text-gray-700 hover:text-primary"
+                )}
+              >
+                FAQ
+              </Link>
+              <Link 
+                to="/rag-framework" 
+                className={cn(
+                  "text-sm font-medium transition-colors",
+                  isActive('/rag-framework') 
+                    ? "text-primary font-semibold" 
+                    : "text-gray-700 hover:text-primary"
+                )}
+              >
+                RAG Framework
+              </Link>
+              <Link 
+                to="/dashboard" 
+                className={cn(
+                  "text-sm font-medium transition-colors",
+                  isActive('/dashboard') 
+                    ? "text-primary font-semibold" 
+                    : "text-gray-700 hover:text-primary"
+                )}
+              >
+                Dashboard
+              </Link>
+            </>
           </nav>
           
           {/* Auth Buttons - Desktop */}
@@ -200,7 +159,7 @@ const Header: React.FC = () => {
                     <NavigationMenuItem>
                       <NavigationMenuTrigger className="bg-transparent">
                         <span className="text-sm font-medium">
-                          {user.attributes.name || user.username}
+                          {user.name || "User"}
                         </span>
                       </NavigationMenuTrigger>
                       <NavigationMenuContent>
@@ -214,19 +173,6 @@ const Header: React.FC = () => {
                                 <div className="text-sm font-medium">Dashboard</div>
                                 <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
                                   Manage your courses
-                                </p>
-                              </Link>
-                            </NavigationMenuLink>
-                          </li>
-                          <li>
-                            <NavigationMenuLink asChild>
-                              <Link
-                                to="/projects"
-                                className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                              >
-                                <div className="text-sm font-medium">Projects</div>
-                                <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                                  Manage your projects
                                 </p>
                               </Link>
                             </NavigationMenuLink>
@@ -277,118 +223,74 @@ const Header: React.FC = () => {
       {isMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-100 py-4 px-4 shadow-lg">
           <nav className="flex flex-col space-y-4">
-            {!user ? (
-              <>
-                <a 
-                  href="#how-it-works"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection('how-it-works');
-                  }}
-                  className={cn(
-                    "text-sm font-medium py-2 px-3 rounded-md transition-colors",
-                    isActive('#how-it-works') 
-                      ? "bg-primary/10 text-primary font-semibold" 
-                      : "text-gray-700 hover:bg-gray-100"
-                  )}
-                >
-                  How It Works
-                </a>
-                <a 
-                  href="#features"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection('features');
-                  }}
-                  className={cn(
-                    "text-sm font-medium py-2 px-3 rounded-md transition-colors",
-                    isActive('#features') 
-                      ? "bg-primary/10 text-primary font-semibold" 
-                      : "text-gray-700 hover:bg-gray-100"
-                  )}
-                >
-                  Features
-                </a>
-                <a 
-                  href="#pricing"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection('pricing');
-                  }}
-                  className={cn(
-                    "text-sm font-medium py-2 px-3 rounded-md transition-colors",
-                    isActive('#pricing') 
-                      ? "bg-primary/10 text-primary font-semibold" 
-                      : "text-gray-700 hover:bg-gray-100"
-                  )}
-                >
-                  Pricing
-                </a>
-                <Link 
-                  to="/faq" 
-                  className={cn(
-                    "text-sm font-medium py-2 px-3 rounded-md transition-colors",
-                    isActive('/faq') 
-                      ? "bg-primary/10 text-primary font-semibold" 
-                      : "text-gray-700 hover:bg-gray-100"
-                  )}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  FAQ
-                </Link>
-                <Link 
-                  to="/rag-framework" 
-                  className={cn(
-                    "text-sm font-medium py-2 px-3 rounded-md transition-colors",
-                    isActive('/rag-framework') 
-                      ? "bg-primary/10 text-primary font-semibold" 
-                      : "text-gray-700 hover:bg-gray-100"
-                  )}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  RAG Framework
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link 
-                  to="/dashboard" 
-                  className={cn(
-                    "text-sm font-medium py-2 px-3 rounded-md transition-colors",
-                    isActive('/dashboard') 
-                      ? "bg-primary/10 text-primary font-semibold" 
-                      : "text-gray-700 hover:bg-gray-100"
-                  )}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  My Courses
-                </Link>
-                <Link 
-                  to="/projects" 
-                  className={cn(
-                    "text-sm font-medium py-2 px-3 rounded-md transition-colors",
-                    isActive('/projects') 
-                      ? "bg-primary/10 text-primary font-semibold" 
-                      : "text-gray-700 hover:bg-gray-100"
-                  )}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  My Projects
-                </Link>
-                <Link 
-                  to="/dashboard/settings" 
-                  className={cn(
-                    "text-sm font-medium py-2 px-3 rounded-md transition-colors",
-                    isActive('/dashboard/settings') 
-                      ? "bg-primary/10 text-primary font-semibold" 
-                      : "text-gray-700 hover:bg-gray-100"
-                  )}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Settings
-                </Link>
-              </>
-            )}
+            <>
+              <a 
+                href="#how-it-works"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToSection('how-it-works');
+                }}
+                className={cn(
+                  "text-sm font-medium py-2 px-3 rounded-md transition-colors",
+                  isActive('#how-it-works') 
+                    ? "bg-primary/10 text-primary font-semibold" 
+                    : "text-gray-700 hover:bg-gray-100"
+                )}
+              >
+                How It Works
+              </a>
+              <a 
+                href="#features"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToSection('features');
+                }}
+                className={cn(
+                  "text-sm font-medium py-2 px-3 rounded-md transition-colors",
+                  isActive('#features') 
+                    ? "bg-primary/10 text-primary font-semibold" 
+                    : "text-gray-700 hover:bg-gray-100"
+                )}
+              >
+                Features
+              </a>
+              <Link 
+                to="/faq" 
+                className={cn(
+                  "text-sm font-medium py-2 px-3 rounded-md transition-colors",
+                  isActive('/faq') 
+                    ? "bg-primary/10 text-primary font-semibold" 
+                    : "text-gray-700 hover:bg-gray-100"
+                )}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                FAQ
+              </Link>
+              <Link 
+                to="/rag-framework" 
+                className={cn(
+                  "text-sm font-medium py-2 px-3 rounded-md transition-colors",
+                  isActive('/rag-framework') 
+                    ? "bg-primary/10 text-primary font-semibold" 
+                    : "text-gray-700 hover:bg-gray-100"
+                )}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                RAG Framework
+              </Link>
+              <Link 
+                to="/dashboard" 
+                className={cn(
+                  "text-sm font-medium py-2 px-3 rounded-md transition-colors",
+                  isActive('/dashboard') 
+                    ? "bg-primary/10 text-primary font-semibold" 
+                    : "text-gray-700 hover:bg-gray-100"
+                )}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+            </>
 
             {/* Auth Buttons - Mobile */}
             <div className="pt-4 border-t border-gray-100">
@@ -396,7 +298,7 @@ const Header: React.FC = () => {
                 <>
                   <div className="py-2 px-3 mb-3 bg-gray-50 rounded-md">
                     <p className="text-sm font-medium text-gray-700">
-                      Signed in as: {user.attributes.name || user.username}
+                      Signed in as: {user.name || "User"}
                     </p>
                   </div>
                   <Button 

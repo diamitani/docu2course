@@ -57,19 +57,14 @@ export const safeJSONParse = (text: string): any => {
         } catch (cleaningError) {
           console.log("Cleaned JSON parse attempt failed", cleaningError);
           
-          // Last resort - try to replace single quotes with double quotes (common AI mistake)
+          // Attempt more aggressive fixes
           try {
-            console.log("Attempting to fix quotes and unquoted keys");
-            // This is a simplistic approach and may cause issues with legitimate single quotes in strings
-            const fixedQuotes = cleanedText
-              .replace(/'/g, '"')
-              .replace(/(\w+):/g, '"$1":') // Fix unquoted keys
-              .replace(/,\s*}/g, '}') // Remove trailing commas in objects
-              .replace(/,\s*\]/g, ']'); // Remove trailing commas in arrays
-              
-            return JSON.parse(fixedQuotes);
-          } catch (quotesError) {
-            console.log("Fixed quotes JSON parse attempt failed", quotesError);
+            // Create a fallback JSON if all parsing attempts fail
+            const fallbackJSON = generateFallbackJSON(cleanedText);
+            console.log("Generated fallback JSON structure");
+            return fallbackJSON;
+          } catch (fallbackError) {
+            console.log("Fallback JSON generation failed", fallbackError);
           }
         }
       }
@@ -79,7 +74,92 @@ export const safeJSONParse = (text: string): any => {
     
     console.log("All JSON parsing attempts failed. Original text preview:", text.substring(0, 500) + "...");
     
-    // If everything fails, return null (will trigger fallback content)
-    return null;
+    // Return a minimal fallback structure as a last resort
+    return createEmptyFallbackJSON();
   }
 };
+
+/**
+ * Attempts to salvage parts of malformed JSON
+ */
+function generateFallbackJSON(text: string): any {
+  // Extract the title if possible
+  const titleMatch = text.match(/"title"[\s]*:[\s]*"([^"]+)"/);
+  const title = titleMatch ? titleMatch[1] : "Document Analysis";
+  
+  // Extract the description if possible
+  const descMatch = text.match(/"description"[\s]*:[\s]*"([^"]+)"/);
+  const description = descMatch ? descMatch[1] : "Content extracted from your document.";
+  
+  // Try to extract any module titles
+  const moduleTitles: string[] = [];
+  const moduleTitleRegex = /"title"[\s]*:[\s]*"([^"]+)"/g;
+  let match;
+  while ((match = moduleTitleRegex.exec(text)) !== null) {
+    if (match[1] !== title) { // Don't include the course title
+      moduleTitles.push(match[1]);
+    }
+  }
+  
+  // Create a basic structure
+  return {
+    title,
+    description,
+    modules: moduleTitles.length > 0 
+      ? moduleTitles.map(moduleTitle => ({
+          title: moduleTitle,
+          content: "Content from your document related to this topic.",
+          objectives: ["Understand key concepts", "Learn fundamental principles"],
+          quiz: {
+            question: "What is the main focus of this section?",
+            options: ["Understanding concepts", "Practical application", "Historical context", "Future developments"],
+            answer: 0
+          },
+          activities: ["Review the related content in the original document"],
+          resources: ["Original document"]
+        }))
+      : [
+          {
+            title: "Document Overview",
+            content: "Key information extracted from your document.",
+            objectives: ["Understand the document content", "Identify key themes"],
+            quiz: {
+              question: "What is the main purpose of the document?",
+              options: ["Information", "Instruction", "Analysis", "Reference"],
+              answer: 0
+            },
+            activities: ["Review the original document"],
+            resources: ["Original document"]
+          }
+        ]
+  };
+}
+
+/**
+ * Creates a minimal JSON structure when all parsing attempts fail
+ */
+function createEmptyFallbackJSON(): any {
+  return {
+    title: "Document Analysis",
+    description: "We've processed your document, but encountered some formatting issues. Here's a basic course structure.",
+    modules: [
+      {
+        title: "Document Overview",
+        content: "Your document has been analyzed. While we had trouble extracting structured content, we've created this simple course outline for you.",
+        objectives: ["Understand document format", "Review document content", "Identify key sections"],
+        quiz: {
+          question: "What would improve the document processing results?",
+          options: [
+            "Using a clearer document structure", 
+            "Providing a text-based document", 
+            "Breaking content into sections with headings", 
+            "All of the above"
+          ],
+          answer: 3
+        },
+        activities: ["Review your original document", "Consider reformatting for better results"],
+        resources: ["Original document"]
+      }
+    ]
+  };
+}
