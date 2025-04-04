@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Eye, Trash2, File, Upload as UploadIcon, Clock } from 'lucide-react';
+import { UploadIcon, Trash2, File, BookOpen, Edit, Upload as UploadLucide } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { Link } from 'react-router-dom';
 import Upload from '@/components/Upload';  // Using default import for the Upload component
@@ -124,7 +125,7 @@ const Dashboard: React.FC = () => {
         {/* Display when no courses are available */}
         {courseHistory.length === 0 && !isUploading && (
           <div className="text-center py-16 bg-gray-50 rounded-lg">
-            <UploadCloud className="w-16 h-16 mx-auto text-gray-400" />
+            <UploadLucide className="w-16 h-16 mx-auto text-gray-400" />
             <h2 className="mt-4 text-xl font-medium">No courses yet</h2>
             <p className="mt-2 text-gray-500 max-w-md mx-auto">
               Upload your first document to get started with AI-generated courses.
@@ -167,7 +168,7 @@ const Dashboard: React.FC = () => {
                     size="sm"
                     onClick={() => handleDeleteCourse(course.id)}
                   >
-                    <Trash className="h-4 w-4 mr-2" />
+                    <Trash2 className="h-4 w-4 mr-2" />
                     Delete
                   </Button>
                 </div>
