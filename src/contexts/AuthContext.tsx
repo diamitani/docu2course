@@ -1,5 +1,14 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { 
+  getCurrentUser, 
+  signIn as authSignIn,
+  signUp as authSignUp,
+  confirmSignUp as authConfirmSignUp,
+  signOut as authSignOut,
+  isAuthenticated as authIsAuthenticated
+} from '@/utils/auth/awsAuthService';
 
 interface UserData {
   name?: string;
@@ -26,40 +35,68 @@ const defaultContext: AuthContextType = {
   signUp: async () => {},
   confirmSignUp: async () => {},
   signOut: async () => {},
-  isAuthenticated: async () => true,
+  isAuthenticated: async () => false,
 };
 
 const AuthContext = createContext<AuthContextType>(defaultContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserData | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Check for user in localStorage on initial load
+  // Initialize user data from Supabase session
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    const initializeAuth = async () => {
       try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error('Error parsing stored user data:', e);
-        localStorage.removeItem('user');
+        // Set up auth state listener
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (event, session) => {
+            if (session && session.user) {
+              setUser({
+                id: session.user.id,
+                email: session.user.email,
+                name: session.user.user_metadata.username || session.user.email?.split('@')[0],
+              });
+            } else {
+              setUser(null);
+            }
+            setLoading(false);
+          }
+        );
+
+        // Check for existing session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session && session.user) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email,
+            name: session.user.user_metadata.username || session.user.email?.split('@')[0],
+          });
+        }
+
+        setLoading(false);
+        return () => {
+          subscription.unsubscribe();
+        };
+      } catch (err: any) {
+        console.error('Auth initialization error:', err);
+        setError(err.message);
+        setLoading(false);
       }
-    }
+    };
+
+    initializeAuth();
   }, []);
 
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
     try {
-      // Simulate auth for the portfolio site
-      const userData = { name: 'Demo User', email, id: '123456' };
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
+      await authSignIn(email, password);
     } catch (err: any) {
       setError(err.message || 'Failed to sign in');
-      console.error('Sign in error:', err);
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -69,13 +106,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     setError(null);
     try {
-      // Simulate signup for the portfolio site
-      const newUser = { ...userData, email, id: '123456' };
-      setUser(newUser);
-      localStorage.setItem('user', JSON.stringify(newUser));
+      await authSignUp(email, password);
     } catch (err: any) {
       setError(err.message || 'Failed to sign up');
-      console.error('Sign up error:', err);
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -85,11 +119,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     setError(null);
     try {
-      // For portfolio site, just simulate confirmation
-      console.log(`Confirming signup for ${email} with code ${code}`);
+      await authConfirmSignUp(email, code);
     } catch (err: any) {
       setError(err.message || 'Failed to confirm sign up');
-      console.error('Confirm sign up error:', err);
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -98,9 +131,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     setLoading(true);
     try {
-      // Clear user data
+      await authSignOut();
       setUser(null);
-      localStorage.removeItem('user');
     } catch (err: any) {
       console.error('Sign out error:', err);
     } finally {
@@ -109,7 +141,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const isAuthenticated = async () => {
-    return !!user;
+    return authIsAuthenticated();
   };
 
   const contextValue = {

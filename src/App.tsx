@@ -10,6 +10,9 @@ import NotFound from "./pages/NotFound";
 import RAGFramework from "./pages/RAGFramework";
 import FAQ from "./pages/FAQ";
 import Dashboard from "./pages/Dashboard";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import AuthMiddleware from "./middleware/AuthMiddleware";
 
 const queryClient = new QueryClient();
 
@@ -25,7 +28,15 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/rag-framework" element={<RAGFramework />} />
             <Route path="/faq" element={<FAQ />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            
+            {/* Protected routes */}
+            <Route path="/dashboard" element={
+              <AuthMiddleware>
+                <Dashboard />
+              </AuthMiddleware>
+            } />
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />

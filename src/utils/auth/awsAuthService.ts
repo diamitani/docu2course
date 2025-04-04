@@ -1,32 +1,65 @@
 
-import { Amplify } from 'aws-amplify';
-import { cognitoConfig } from '@/config/aws-config';
+import { supabase } from '@/integrations/supabase/client';
 
-// Configure Amplify with our Cognito settings
+// Configure authentication using Supabase
 export const configureAuth = () => {
-  // Basic configuration that won't cause TypeScript errors
-  Amplify.configure({
-    Auth: {
-      Cognito: {
-        userPoolId: cognitoConfig.userPoolId,
-        userPoolClientId: cognitoConfig.userPoolWebClientId,
-        signUpVerificationMethod: 'code'
-      }
-    }
-  });
+  // No configuration needed for Supabase client
 };
 
-// Simplified auth methods
+// Get the current user from Supabase
 export const getCurrentUser = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
+};
+
+// Check if user is authenticated
+export const isAuthenticated = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  return !!user;
+};
+
+// Sign in with email and password
+export const signIn = async (email: string, password: string) => {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+  
+  if (error) {
+    throw error;
+  }
+  
+  return data.user;
+};
+
+// Sign up with email and password
+export const signUp = async (email: string, password: string) => {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password
+  });
+  
+  if (error) {
+    throw error;
+  }
+  
+  return data.user;
+};
+
+// Confirm sign up with code
+export const confirmSignUp = async (email: string, token: string) => {
+  // Supabase handles email confirmation differently, this is a stub
+  // This would be used if we were manually handling token verification
   return null;
 };
 
-export const isAuthenticated = async () => {
-  return true; // Always return authenticated for the portfolio site
+// Sign out
+export const signOut = async () => {
+  const { error } = await supabase.auth.signOut();
+  
+  if (error) {
+    throw error;
+  }
+  
+  return null;
 };
-
-// Export empty functions for compatibility
-export const signIn = async () => null;
-export const signUp = async () => null;
-export const confirmSignUp = async () => null;
-export const signOut = async () => null;

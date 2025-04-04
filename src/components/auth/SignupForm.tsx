@@ -4,20 +4,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { signUp } from '@/utils/auth/awsAuthService';
 
 interface SignupFormProps {
-  onSuccess: (username: string) => void;
+  onSuccess: (email: string) => void;
 }
 
 const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!username || !email) {
+    if (!username || !email || !password) {
       toast.error('Please fill out all required fields');
       return;
     }
@@ -25,13 +27,12 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
     setIsLoading(true);
     
     try {
-      // For demo purposes, just simulate signup
-      setTimeout(() => {
-        toast.success('Account created! This is a demo - no actual account was created.');
-        onSuccess(username);
-      }, 1000);
+      await signUp(email, password);
+      toast.success('Account created! Please check your email for confirmation.');
+      onSuccess(email);
     } catch (error: any) {
-      toast.error('This is a demo - no actual signup functionality is implemented.');
+      console.error('Signup error:', error);
+      toast.error(error.message || 'Failed to create account. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -63,13 +64,21 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
         />
       </div>
       
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? 'Creating Demo Account...' : 'Demo Sign Up'}
-      </Button>
+      <div className="space-y-2">
+        <Label htmlFor="password">Password*</Label>
+        <Input
+          id="password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Create a password"
+          required
+        />
+      </div>
       
-      <p className="text-sm text-center text-muted-foreground">
-        This is a portfolio demo. No actual account will be created.
-      </p>
+      <Button type="submit" className="w-full" disabled={isLoading}>
+        {isLoading ? 'Creating Account...' : 'Sign Up'}
+      </Button>
     </form>
   );
 };

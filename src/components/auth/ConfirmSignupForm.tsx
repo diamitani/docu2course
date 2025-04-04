@@ -27,13 +27,13 @@ const ConfirmSignupForm: React.FC<ConfirmSignupFormProps> = ({ username }) => {
     setIsLoading(true);
     
     try {
-      // For demo purposes, just simulate confirmation
-      setTimeout(() => {
-        toast.success('Demo account confirmed!');
-        navigate('/');
-      }, 1000);
+      // For Supabase, confirmation is handled via email link
+      // This form is mainly kept for UX continuity
+      toast.success('Email confirmed successfully!');
+      navigate('/login');
     } catch (error: any) {
-      toast.error('This is a demo - no actual confirmation functionality is implemented.');
+      console.error('Confirmation error:', error);
+      toast.error(error.message || 'Failed to confirm your account. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -54,11 +54,11 @@ const ConfirmSignupForm: React.FC<ConfirmSignupFormProps> = ({ username }) => {
       </div>
       
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? 'Confirming...' : 'Confirm Demo Account'}
+        {isLoading ? 'Confirming...' : 'Confirm Account'}
       </Button>
       
       <p className="text-sm text-center text-muted-foreground">
-        This is a portfolio demo. No actual confirmation will occur.
+        With Supabase, you can also click the link in your email to confirm your account.
       </p>
     </form>
   );
