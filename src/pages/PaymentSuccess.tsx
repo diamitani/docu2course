@@ -4,12 +4,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 const PaymentSuccess: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [isVerifying, setIsVerifying] = useState(true);
   
   const sessionId = searchParams.get('session_id');
@@ -17,10 +16,7 @@ const PaymentSuccess: React.FC = () => {
   useEffect(() => {
     if (sessionId) {
       // Show success notification
-      toast({
-        title: "Payment successful!",
-        description: "Your subscription has been activated.",
-      });
+      toast.success("Payment successful! Your subscription has been activated.");
       
       // In a real app, you might want to verify the payment status on the server side
       setTimeout(() => {
@@ -29,7 +25,7 @@ const PaymentSuccess: React.FC = () => {
     } else {
       navigate('/');
     }
-  }, [sessionId, navigate, toast]);
+  }, [sessionId, navigate]);
 
   return (
     <Layout>

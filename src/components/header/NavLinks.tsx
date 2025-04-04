@@ -95,6 +95,11 @@ const NavLinks: React.FC<NavLinksProps> = ({
         }}
       />
       <NavLink 
+        href="/pricing" 
+        label="Pricing"
+        onClick={closeMenu}
+      />
+      <NavLink 
         href="/faq" 
         label="FAQ"
         onClick={closeMenu}

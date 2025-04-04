@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@12.7.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,11 +17,25 @@ serve(async (req) => {
   }
 
   try {
-    const { auth } = await req.json();
+    const { product_id, email } = await req.json();
     const authHeader = req.headers.get('Authorization');
     
     if (!authHeader) {
       throw new Error('Missing Authorization header');
+    }
+
+    // Initialize Supabase client for user verification
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") || "",
+      Deno.env.get("SUPABASE_ANON_KEY") || ""
+    );
+
+    // Get the user from the authorization header
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+    
+    if (userError || !user) {
+      throw new Error('Not authenticated');
     }
 
     // Initialize Stripe
@@ -28,20 +43,31 @@ serve(async (req) => {
       apiVersion: "2023-10-16",
     });
 
+    // Determine price ID based on product_id and plan type
+    let price_id;
+    
+    // Fetch the product to get its default price
+    const product = await stripe.products.retrieve(product_id);
+    price_id = product.default_price as string;
+
+    if (!price_id) {
+      throw new Error('No price found for the selected product');
+    }
+
     // Create a checkout session with Stripe
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
         {
-          price: Deno.env.get("STRIPE_PRICE_ID") || "",
+          price: price_id,
           quantity: 1,
         },
       ],
       mode: "subscription",
       success_url: `${req.headers.get("origin")}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/subscription?canceled=true`,
-      client_reference_id: auth?.id,
-      customer_email: auth?.email,
+      cancel_url: `${req.headers.get("origin")}/pricing?canceled=true`,
+      client_reference_id: user.id,
+      customer_email: email || user.email,
     });
 
     return new Response(JSON.stringify({ url: session.url }), {

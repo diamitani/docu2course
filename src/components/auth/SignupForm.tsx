@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,6 +16,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,8 +30,8 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess }) => {
     
     try {
       await signUp(email, password);
-      toast.success('Account created! Please check your email for confirmation.');
-      onSuccess(email);
+      toast.success('Account created. Welcome!');
+      navigate('/dashboard');
     } catch (error: any) {
       console.error('Signup error:', error);
       toast.error(error.message || 'Failed to create account. Please try again.');

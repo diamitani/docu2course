@@ -1,65 +1,66 @@
+
 import React from 'react';
-import { loadStripe } from '@stripe/stripe-js';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckIcon, DollarSign } from 'lucide-react';
 import { toast } from "sonner";
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PricingSectionProps {
   id?: string;
 }
 
-// Initialize Stripe with the publishable key
-const stripePromise = loadStripe('pk_live_51QzjjzB2toh1Zq62emo5ayCdY1v9WF5N66qaJwMtfxmY1PHUbyqxMZ7qrOEvmi38BlpfNBTAsAt6OD4o0l6gPYus00zH6XXfPV');
-
-// Stripe price IDs for the different plans
-// Product ID for $5 unlimited is prod_S0kUtHpTN8fOoA
-const STRIPE_PRICES = {
-  monthly: 'price_1SGUo4B2toh1Zq62eHFPEgjc',  // $5/month - product: prod_S0kUtHpTN8fOoA
-  yearly: 'price_1SGUp2B2toh1Zq62zChcEWI4'    // $20/year
-};
-
 const PricingSection: React.FC<PricingSectionProps> = ({ id = "pricing" }) => {
-  const handleFreePlan = () => {
-    document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth' });
-    toast.success("You're using the free plan! You can process 1 document per day.");
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  
+  // Product IDs for the different plans
+  const PRODUCTS = {
+    monthly: 'prod_S0kVCDHwTSNOcV',
+    yearly: 'prod_S0kWOUMG5ybW84'
   };
 
-  const handleSubscribe = async (priceId: string, planType: string) => {
-    try {
-      const stripe = await stripePromise;
-      if (!stripe) {
-        throw new Error("Stripe failed to initialize");
-      }
+  const handleFreePlan = () => {
+    if (!user) {
+      navigate('/signup');
+    } else {
+      document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth' });
+      toast.success("You're using the free plan! You can process 1 document per day.");
+    }
+  };
 
-      toast.info("Redirecting to Stripe checkout...");
+  const handleSubscribe = async (productId: string, planType: string) => {
+    if (!user) {
+      toast.info("Please sign in to subscribe");
+      navigate('/login', { state: { from: '/pricing' } });
+      return;
+    }
+
+    try {
+      toast.info("Preparing checkout...");
       
-      const { error } = await stripe.redirectToCheckout({
-        lineItems: [
-          {
-            price: priceId,
-            quantity: 1,
-          },
-        ],
-        mode: 'subscription',
-        successUrl: `${window.location.origin}/?success=true&plan=${planType}`,
-        cancelUrl: `${window.location.origin}/?canceled=true`,
+      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+        body: { 
+          product_id: productId,
+          email: user.email
+        }
       });
 
       if (error) {
-        console.error('Stripe checkout error:', error);
-        toast.error(`Payment error: ${error.message}`);
+        throw error;
+      }
+
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL returned");
       }
     } catch (err) {
       console.error('Error in checkout:', err);
       toast.error("There was a problem processing your payment. Please try again.");
     }
-  };
-
-  const handleEnterprisePlan = () => {
-    // For enterprise, redirect to a contact form or open a modal
-    window.location.href = "mailto:sales@yourdomain.com?subject=Enterprise%20Plan%20Inquiry";
-    toast.success("We'll be in touch soon about our Enterprise plan!");
   };
 
   return (
@@ -123,7 +124,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({ id = "pricing" }) => {
               </ul>
             </CardContent>
             <CardFooter>
-              <Button className="w-full" onClick={() => handleSubscribe(STRIPE_PRICES.monthly, 'monthly')}>
+              <Button className="w-full" onClick={() => handleSubscribe(PRODUCTS.monthly, 'monthly')}>
                 <DollarSign className="mr-1 h-4 w-4" />
                 Subscribe Monthly
               </Button>
@@ -154,7 +155,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({ id = "pricing" }) => {
             </CardContent>
             <CardFooter>
               <Button variant="outline" className="w-full bg-green-50 hover:bg-green-100 border-green-200" 
-                onClick={() => handleSubscribe(STRIPE_PRICES.yearly, 'yearly')}>
+                onClick={() => handleSubscribe(PRODUCTS.yearly, 'yearly')}>
                 <DollarSign className="mr-1 h-4 w-4" />
                 Subscribe Yearly
               </Button>
