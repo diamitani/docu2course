@@ -1,10 +1,34 @@
 
 import { CourseType, FAQType } from '../processingUtils';
 import { toast } from "sonner";
-import { callAiApi } from '../api/deepSeekClient';
+import { supabase } from '@/integrations/supabase/client';
 import { safeJSONParse } from '../helpers/jsonParser';
 import { createFallbackCourse, createFallbackFAQ } from '../fallbacks/contentFallbacks';
 import { buildCoursePrompt, buildFAQPrompt, buildPromptBasedCoursePrompt } from '../prompts/promptBuilder';
+
+/**
+ * Calls the OpenAI Assistant via Supabase Edge Function
+ */
+const callOpenAIAssistant = async (prompt: string, threadId?: string): Promise<any> => {
+  const { data, error } = await supabase.functions.invoke('chat-with-assistant', {
+    body: { 
+      prompt,
+      threadId,
+      userId: (await supabase.auth.getUser()).data.user?.id
+    }
+  });
+
+  if (error) {
+    console.error('Error calling OpenAI Assistant:', error);
+    throw new Error(error.message || 'Failed to call OpenAI Assistant');
+  }
+
+  if (!data.success) {
+    throw new Error(data.error || 'Assistant API call failed');
+  }
+
+  return data;
+};
 
 /**
  * Generates a course structure from document content
@@ -15,13 +39,13 @@ export const generateCourseFromDocument = async (fileContent: string): Promise<C
   try {
     toast.info("Generating course structure...");
     const prompt = buildCoursePrompt(fileContent);
-    console.log("Sending request to AI API for course generation");
+    console.log("Sending request to OpenAI Assistant for course generation");
     
-    const data = await callAiApi(prompt);
-    console.log("Received response from AI API");
+    const data = await callOpenAIAssistant(prompt);
+    console.log("Received response from OpenAI Assistant");
     
-    const content = data.choices[0].message.content;
-    console.log("API Response content sample:", content.substring(0, 200) + "...");
+    const content = data.content;
+    console.log("Assistant Response content sample:", content.substring(0, 200) + "...");
     
     const courseData = safeJSONParse(content);
     
@@ -60,13 +84,13 @@ export const generateCourseFromPromptText = async (title: string, promptText: st
   try {
     toast.info("Generating custom course from prompt...");
     const prompt = buildPromptBasedCoursePrompt(title, promptText);
-    console.log("Sending request to AI API for prompt-based course generation");
+    console.log("Sending request to OpenAI Assistant for prompt-based course generation");
     
-    const data = await callAiApi(prompt);
-    console.log("Received response from AI API");
+    const data = await callOpenAIAssistant(prompt);
+    console.log("Received response from OpenAI Assistant");
     
-    const content = data.choices[0].message.content;
-    console.log("API Response content sample:", content.substring(0, 200) + "...");
+    const content = data.content;
+    console.log("Assistant Response content sample:", content.substring(0, 200) + "...");
     
     const courseData = safeJSONParse(content);
     
@@ -103,13 +127,13 @@ export const generateFAQFromDocument = async (fileContent: string): Promise<FAQT
   try {
     toast.info("Generating FAQ knowledge base...");
     const prompt = buildFAQPrompt(fileContent);
-    console.log("Sending request to AI API for FAQ generation");
+    console.log("Sending request to OpenAI Assistant for FAQ generation");
     
-    const data = await callAiApi(prompt);
-    console.log("Received response from AI API");
+    const data = await callOpenAIAssistant(prompt);
+    console.log("Received response from OpenAI Assistant");
     
-    const content = data.choices[0].message.content;
-    console.log("FAQ API Response content sample:", content.substring(0, 200) + "...");
+    const content = data.content;
+    console.log("FAQ Assistant Response content sample:", content.substring(0, 200) + "...");
     
     const faqData = safeJSONParse(content);
     
