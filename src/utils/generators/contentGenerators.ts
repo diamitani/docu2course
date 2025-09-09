@@ -9,12 +9,23 @@ import { buildCoursePrompt, buildFAQPrompt, buildPromptBasedCoursePrompt } from 
 /**
  * Calls the OpenAI Assistant via Supabase Edge Function
  */
-const callOpenAIAssistant = async (prompt: string, threadId?: string): Promise<any> => {
+const callOpenAIAssistant = async (prompt: string, threadId?: string, projectId?: string): Promise<any> => {
+  // Get the current user
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  
+  if (authError || !user) {
+    console.error('Authentication error:', authError);
+    throw new Error('User not authenticated');
+  }
+
+  console.log('Calling OpenAI Assistant for user:', user.id);
+
   const { data, error } = await supabase.functions.invoke('chat-with-assistant', {
     body: { 
       prompt,
       threadId,
-      userId: (await supabase.auth.getUser()).data.user?.id
+      projectId,
+      userId: user.id
     }
   });
 
