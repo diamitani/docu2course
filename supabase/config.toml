@@ -1,8 +1,1 @@
-
-project_id = "lovable-docu2course"
-
-[functions.create-checkout-session]
-verify_jwt = true
-
-[functions.stripe-webhook]
-verify_jwt = false
+project_id = "eplbiijiklziztopdson"
